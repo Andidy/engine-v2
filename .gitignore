@@ -332,3 +332,16 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+
+
+
+
+#
+#
+#  My Changes to the .gitignore
+#
+#
+
+raysan5/*
+build/*

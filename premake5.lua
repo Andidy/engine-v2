@@ -53,7 +53,7 @@ project "raylib"
 			
 		filter{}
 		
-		location "./"
+		location "vs"
 		language "C++"
 		targetdir "build/%{cfg.buildcfg}"
 		cppdialect "C++17"
@@ -68,7 +68,7 @@ project "raylib"
 		
 project "engine-v2"
 	kind "ConsoleApp"
-	location "./"
+	location "vs"
 	language "C++"
 	targetdir "build/%{cfg.buildcfg}"
 	cppdialect "C++17"
