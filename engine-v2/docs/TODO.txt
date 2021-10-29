@@ -1,0 +1,61 @@
+# This is the TODO list for this project
+# It should be converted into Github issues eventually
+
+# Engine ---
+- Component Saving / Loading
+- Entity Saving / Loading
+- Component Blueprints
+- Entity Blueprints
+- File format / Specification for Entities/Components/Blueprints on disk
+- Entity/Component/Blueprint Editor GUI (debug view)
+
+- Sound System
+
+# Game ---
+- ECS (how much who knows?)
+- 2D Graphics
+  - Texture loading
+  - Sprite Animation
+  - Debug view
+    - event regions
+    - quest visualizer?
+    - entity/component/unit/map inspector
+- Grid system
+  - AABB (mouse handling)
+  - Pathfinding
+    - Grids probably small and turn-based, A* likely fine?
+  - full undo and redo support for actions
+  - replay system
+  - Fog of War?
+  - Enemy AI
+  - Friendly AI
+- Unit classes / types
+  - infantry, cavalry
+  - armored, unarmored
+  - ranged, melee
+  - charge mechanic
+  - buff mechanics (self-buff, ally-buff, enemy-debuff)
+  - tactic mechanic? 
+    - (mov-atk-mov, mov-atk, atk-mov, buff-atk, rang_atk-move-atk)
+    - (player created or only developer / modder created?)
+  - Unit Editor
+
+- Main Menu
+- Settings Menu
+- Game Scene
+  - Battle Scene
+  - Map Scene
+  - Map Editor Scene
+  - Battle Editor Scene
+  - Cutscene / Conversation Scene
+  - Campaign system (level 1 -> level 2, level 2 -> level 3 or level 4, level 3 or level 4 -> level 5)
+  - Saves and Save Loading
+
+# Input ---
+- Only Mouse Support
+- Only Keyboard Support
+- Mouse + Keyboard Support
+- Controller Support?
+- Action System Decouples Input from Actions
+
+- Dev/Cheat console
