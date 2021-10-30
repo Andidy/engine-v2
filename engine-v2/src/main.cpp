@@ -8,6 +8,41 @@
 
 static void Button000(GameState* gs);
 
+void DrawGridLines(GameState& gs) {
+	float spacing = gs.entity_scale;
+
+	// Draw the vertical lines
+	float min = gs.camera.target.x;
+	min = ceilf(min / spacing) * spacing;
+
+	float max = gs.camera.target.x + gs.game_width;
+	max = ceilf(max / spacing) * spacing;
+
+	if(IsKeyPressed(KEY_B)) printf("min: %f, max: %f\n", min, max);
+
+	for (float i = min; i < max; i += spacing)
+	{
+		Vector2 begin = { i, gs.camera.target.y };
+		Vector2 end = { i, gs.camera.target.y + gs.game_height };
+		
+		DrawLineV(begin, end, LIGHTGRAY);
+	}
+
+	// Draw the horizontal lines
+	min = gs.camera.target.y;
+	min = ceilf(min / spacing) * spacing;
+	max = gs.camera.target.y + gs.game_height;
+	max = ceilf(max / spacing) * spacing;
+
+	for (float i = min; i < max; i += spacing)
+	{
+		Vector2 begin = { gs.camera.target.x, i };
+		Vector2 end = { gs.camera.target.x + gs.game_width, i };
+
+		DrawLineV(begin, end, LIGHTGRAY);
+	}
+}
+
 int main(void) {
 	InitWindow(1200, 900, "raylib [core] example - basic window");
 
@@ -60,6 +95,8 @@ int main(void) {
 		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 		BeginMode2D(gs.camera);
 
+		DrawGridLines(gs);
+
 		DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
 		for (Entity& e : gs.entities) {
@@ -88,7 +125,6 @@ int main(void) {
 		DrawText("WASD to move the first blue square", anchor02.x, anchor02.y + 100, 20, GRAY);
 		DrawText("Arrow keys to move the camera", anchor02.x, anchor02.y + 120, 20, GRAY);
 		DrawText("Holding Shift makes blue square and camera move faster", anchor02.x, anchor02.y + 140, 20, GRAY);
-
 
 		// raygui: controls drawing
 		//----------------------------------------------------------------------------------
