@@ -98,6 +98,11 @@ void GameUpdate(GameState* gs) {
 	if (IsKeyPressed(KEY_U)) {
 		remove("entity.txt");
 	}
+
+	// Debug
+	if (IsKeyPressed(KEY_BACKSPACE)) {
+		__debugbreak();
+	}
 }
 
 // This function is meant as a testbed for saving Entity data to a file so that
@@ -186,7 +191,7 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 						file >> t.pos.x >> ignore_string >> t.pos.y;
 						int transform_index = gs->c_grid_transforms.size();
 						gs->c_grid_transforms.push_back(t);
-						e->transform = transform_index;
+						e->grid_transform = transform_index;
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 					}
