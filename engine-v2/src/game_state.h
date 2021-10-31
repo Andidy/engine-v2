@@ -6,7 +6,11 @@
 #include "entity.h"
 
 struct GameState {
-	// std::unordered_map<std::string, Entity> blueprint_entities;
+	// Assets / Textures
+	std::unordered_map<std::string, size_t> texture_handles;
+	std::vector<Texture2D> textures;
+
+	// Entities and Components
 	std::unordered_map<std::string, cTransform> blueprint_transforms;
 	std::unordered_map<std::string, cGridTransform> blueprint_grid_transforms;
 	

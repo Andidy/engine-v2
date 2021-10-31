@@ -6,6 +6,9 @@
 #include "game_state.h"
 #include "game.h"
 
+#include <filesystem>
+static std::filesystem::path path_to_textures = "assets/gfx";
+
 static void Button000(GameState* gs);
 
 void DrawGridLines(GameState& gs) {
@@ -41,6 +44,13 @@ void DrawGridLines(GameState& gs) {
 
 		DrawLineV(begin, end, LIGHTGRAY);
 	}
+}
+
+void LoadTextureFromFile(GameState& gs, std::string filename) {
+	std::filesystem::path full_path = path_to_textures / std::filesystem::path(filename);
+	size_t index = gs.textures.size();
+	gs.texture_handles.insert({ full_path.filename().stem().string().c_str(), index });
+	gs.textures.push_back(LoadTexture(full_path.string().c_str()));
 }
 
 int main(void) {
@@ -85,6 +95,14 @@ int main(void) {
 
 	RenderTexture2D render_texture = LoadRenderTexture(800, 600);
 
+	// Load Texture Assets
+	//----------------------------------------------------------------------------------
+
+	// std::string tex_name = "Tex0.png";
+	// LoadTextureFromFile(gs, tex_name);
+	
+	//----------------------------------------------------------------------------------
+	
 	while (!WindowShouldClose()) {
 		GameUpdate(&gs);
 
@@ -146,6 +164,9 @@ int main(void) {
 
 		//----------------------------------------------------------------------------------
 
+		// DrawTexture(gs.textures[0], anchor01.x + 10, anchor01.y + 500, WHITE);
+		// DrawTexture(gs.textures[gs.texture_handles["Tex0"]], anchor01.x + 50, anchor01.y + 500, WHITE);
+		
 		EndDrawing();
 	}
 
