@@ -99,6 +99,7 @@ int main(void) {
 	//----------------------------------------------------------------------------------
 
 	// std::string tex_name = "Tex0.png";
+	// This will load "assets/gfx/Tex0.png"
 	// LoadTextureFromFile(gs, tex_name);
 	
 	//----------------------------------------------------------------------------------
@@ -164,9 +165,17 @@ int main(void) {
 
 		//----------------------------------------------------------------------------------
 
+		// Here is an example of hardcoded use of loaded textures.
 		// DrawTexture(gs.textures[0], anchor01.x + 10, anchor01.y + 500, WHITE);
+		// Here is an example of hardcoded use but that is closer to ideal use.
 		// DrawTexture(gs.textures[gs.texture_handles["Tex0"]], anchor01.x + 50, anchor01.y + 500, WHITE);
-		
+		//
+		// Here is an example of ideal usage. Where a reference to an entity 'e' exists.
+		// And 'texture_handle' is a field in struct Entity that doesn't exist in the current code.
+		// DrawTexture(gs.textures[e.texture_handle],
+		//             gs.c_transforms[e.transform].pos.x, gs.c_transforms[e.transform].pos.y,
+		//             gs.entity_scale, gs.entity_scale, BLUE);
+
 		EndDrawing();
 	}
 
