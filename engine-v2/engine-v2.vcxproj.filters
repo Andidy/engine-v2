@@ -9,42 +9,42 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\engine-v2\src\IVector2.h">
+    <ClInclude Include="src\IVector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\entity.h">
+    <ClInclude Include="src\entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\game.h">
+    <ClInclude Include="src\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\game_state.h">
+    <ClInclude Include="src\game_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\grid_transform.h">
+    <ClInclude Include="src\grid_transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\items.h">
+    <ClInclude Include="src\items.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\units.h">
+    <ClInclude Include="src\units.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\engine-v2\src\universal.h">
+    <ClInclude Include="src\universal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\engine-v2\src\entity.cpp">
+    <ClCompile Include="src\entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\engine-v2\src\game.cpp">
+    <ClCompile Include="src\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\engine-v2\src\grid_transform.cpp">
+    <ClCompile Include="src\grid_transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\engine-v2\src\main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

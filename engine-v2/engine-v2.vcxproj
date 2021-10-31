@@ -68,28 +68,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\build\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\engine-v2\</IntDir>
+    <IntDir>obj\x64\Debug\</IntDir>
     <TargetName>engine-v2</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug.DLL|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\build\Debug.DLL\</OutDir>
-    <IntDir>obj\x64\Debug.DLL\engine-v2\</IntDir>
+    <IntDir>obj\x64\Debug.DLL\</IntDir>
     <TargetName>engine-v2</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\build\Release\</OutDir>
-    <IntDir>obj\x64\Release\engine-v2\</IntDir>
+    <IntDir>obj\x64\Release\</IntDir>
     <TargetName>engine-v2</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release.DLL|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\build\Release.DLL\</OutDir>
-    <IntDir>obj\x64\Release.DLL\engine-v2\</IntDir>
+    <IntDir>obj\x64\Release.DLL\</IntDir>
     <TargetName>engine-v2</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
@@ -98,7 +98,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;GRAPHICS_API_OPENGL_43;PLATFORM_DESKTOP;GRAPHICS_API_OPENGL_33;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\src;..\engine-v2;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;.;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -115,7 +115,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;GRAPHICS_API_OPENGL_43;PLATFORM_DESKTOP;GRAPHICS_API_OPENGL_33;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\src;..\engine-v2;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;.;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -132,7 +132,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;GRAPHICS_API_OPENGL_43;PLATFORM_DESKTOP;GRAPHICS_API_OPENGL_33;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\src;..\engine-v2;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;.;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -153,7 +153,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;GRAPHICS_API_OPENGL_43;PLATFORM_DESKTOP;GRAPHICS_API_OPENGL_33;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\src;..\engine-v2;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;.;..\raysan5\raylib\src;..\raysan5\raygui\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -170,23 +170,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\engine-v2\src\IVector2.h" />
-    <ClInclude Include="..\engine-v2\src\entity.h" />
-    <ClInclude Include="..\engine-v2\src\game.h" />
-    <ClInclude Include="..\engine-v2\src\game_state.h" />
-    <ClInclude Include="..\engine-v2\src\grid_transform.h" />
-    <ClInclude Include="..\engine-v2\src\items.h" />
-    <ClInclude Include="..\engine-v2\src\units.h" />
-    <ClInclude Include="..\engine-v2\src\universal.h" />
+    <ClInclude Include="src\IVector2.h" />
+    <ClInclude Include="src\entity.h" />
+    <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\game_state.h" />
+    <ClInclude Include="src\grid_transform.h" />
+    <ClInclude Include="src\items.h" />
+    <ClInclude Include="src\units.h" />
+    <ClInclude Include="src\universal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\engine-v2\src\entity.cpp" />
-    <ClCompile Include="..\engine-v2\src\game.cpp" />
-    <ClCompile Include="..\engine-v2\src\grid_transform.cpp" />
-    <ClCompile Include="..\engine-v2\src\main.cpp" />
+    <ClCompile Include="src\entity.cpp" />
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\grid_transform.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="raylib.vcxproj">
+    <ProjectReference Include="..\raysan5\raylib.vcxproj">
       <Project>{8898EA18-743A-15EF-5DF5-284349369C3F}</Project>
     </ProjectReference>
   </ItemGroup>
