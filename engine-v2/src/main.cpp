@@ -8,6 +8,11 @@
 
 #include <filesystem>
 static std::filesystem::path path_to_textures = "assets/gfx";
+static std::filesystem::path path_to_gui_layouts = "assets/gui/layout";
+static std::filesystem::path path_to_gui_styles = "assets/gui/style";
+static std::string bluish = "bluish";
+static std::string gui_layout_extension = ".rgl";
+static std::string gui_style_extension = ".rgs";
 
 static void Button000(GameState* gs);
 
@@ -67,7 +72,8 @@ int main(void) {
 	gs.blueprint_transforms.insert({"Box", t});
 	gs.blueprint_grid_transforms.insert({ "Box", gt });
 	
-	GuiLoadStyle("assets/gui_style/bluish.rgs");
+	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish) / std::filesystem::path(gui_style_extension);
+	GuiLoadStyle(gui_style_path.string().c_str());
 
 	// my_layout: controls initialization
 	//----------------------------------------------------------------------------------
