@@ -117,6 +117,7 @@ void WriteEntityToFile(GameState* gs) {
 		file << "\tis_active = " << e.is_active << " ;\n";
 		file << "\t" << gs->c_transforms[e.transform].ToString() << "\n";
 		file << "\t" << gs->c_grid_transforms[e.grid_transform].ToString() << "\n";
+		file << "\t" << gs->c_renderables[e.renderable].ToString() << "\n";
 		file << "];\n";
 	}
 
@@ -186,12 +187,24 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 					else if (file_contents == "grid_transform") {
 						// ignore the "= ["
 						file >> ignore_string >> ignore_string;
-						// need to load the transform component
+						// need to load the grid_transform component
 						cGridTransform t;
 						file >> t.pos.x >> ignore_string >> t.pos.y;
 						int transform_index = gs->c_grid_transforms.size();
 						gs->c_grid_transforms.push_back(t);
 						e->grid_transform = transform_index;
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+					}
+					else if (file_contents == "renderable") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+						// need to load the renderable component
+						cRenderable r;
+						file >> r.texture_handle >> ignore_string >> r.tint_color;
+						int renderable_index = gs->c_renderables.size();
+						gs->c_renderables.push_back(r);
+						e->renderable = renderable_index;
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 					}
