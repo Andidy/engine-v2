@@ -13,6 +13,7 @@ static std::filesystem::path path_to_gui_styles = "assets/gui/style";
 static std::string bluish = "bluish";
 static std::string gui_layout_extension = ".rgl";
 static std::string gui_style_extension = ".rgs";
+static std::string texture_extension = ".png";
 
 static void Button000(GameState* gs);
 
@@ -52,7 +53,7 @@ void DrawGridLines(GameState& gs) {
 }
 
 void LoadTextureFromFile(GameState& gs, std::string filename) {
-	std::filesystem::path full_path = path_to_textures / std::filesystem::path(filename);
+	std::filesystem::path full_path = path_to_textures / std::filesystem::path(filename + texture_extension);
 	size_t index = gs.textures.size();
 	gs.texture_handles.insert({ full_path.filename().stem().string().c_str(), index });
 	gs.textures.push_back(LoadTexture(full_path.string().c_str()));
@@ -104,10 +105,14 @@ int main(void) {
 	// Load Texture Assets
 	//----------------------------------------------------------------------------------
 
+	// Load a pure magenta texture to act as the debug texture in slot 0.
+	gs.texture_handles.insert({ "Debug", 0 });
+	gs.textures.push_back(LoadTextureFromImage(GenImageColor(10, 10, MAGENTA)));
+	
 	// std::string tex_name = "Tex0.png";
 	// This will load "assets/gfx/Tex0.png"
 	// LoadTextureFromFile(gs, tex_name);
-	
+
 	//----------------------------------------------------------------------------------
 	
 	while (!WindowShouldClose()) {
@@ -125,7 +130,7 @@ int main(void) {
 		DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
 		for (Entity& e : gs.entities) {
-			DrawRectangle(gs.c_transforms[e.transform].pos.x, gs.c_transforms[e.transform].pos.y, gs.entity_scale, gs.entity_scale, BLUE);
+			DrawTextureEx(gs.textures[gs.c_renderables[e.renderable].texture_handle], gs.c_transforms[e.transform].pos, 0.0f, 1.0f, gs.c_renderables[e.renderable].tint_color);
 		}
 
 		EndMode2D();
@@ -220,12 +225,17 @@ static void Button000(GameState* gs) {
 	size_t i_g_t = gs->c_grid_transforms.size();
 	gs->c_grid_transforms.push_back(gt);
 
+	cRenderable r;
+	size_t i_r = gs->c_renderables.size();
+	gs->c_renderables.push_back(r);
+
 	Entity e = {};
 	e.id = gs->entity_id_counter++;
 	e.is_active = true;
 	e.name = "Box";
 	e.transform = i_t;
 	e.grid_transform = i_g_t;
+	e.renderable = i_r;
 
 	gs->entities.push_back(e);
 }

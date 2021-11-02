@@ -11,3 +11,5 @@
 #include "raylib.h"
 
 #include "IVector2.h"
+
+#include "raylib_cpp_helpers.h"

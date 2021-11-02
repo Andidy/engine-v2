@@ -3,6 +3,7 @@
 #include "universal.h"
 
 #include "grid_transform.h"
+#include "renderable.h"
 #include "entity.h"
 
 struct GameState {
@@ -13,11 +14,13 @@ struct GameState {
 	// Entities and Components
 	std::unordered_map<std::string, cTransform> blueprint_transforms;
 	std::unordered_map<std::string, cGridTransform> blueprint_grid_transforms;
+	std::unordered_map<std::string, cRenderable> blueprint_renderables;
 	
 	int64_t entity_id_counter = 0;
 	std::vector<Entity> entities;
 	std::vector<cTransform> c_transforms;
 	std::vector<cGridTransform> c_grid_transforms;
+	std::vector<cRenderable> c_renderables;
 
 	int32_t selected_entity = 0;
 

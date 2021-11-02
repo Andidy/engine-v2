@@ -2,10 +2,10 @@
 
 std::string cTransform::ToString() {
 	std::string result = "";
-	result.append("component transform = [ ");
-	result.append(std::to_string(pos.x));
-	result.append(", ");
-	result.append(std::to_string(pos.y));
-	result.append(" ] ;");
+	result += "component transform = [ ";
+	result += std::to_string(pos.x);
+	result += ", ";
+	result += std::to_string(pos.y);
+	result += " ] ;";
 	return result;
 }
