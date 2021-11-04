@@ -43,10 +43,6 @@ void GameUpdate(GameState* gs) {
 		}
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		__debugbreak();
-	}
-
 	// Update the mouse position
 	gs->mouse_pos = GetMousePosition();
 	
@@ -99,7 +95,7 @@ void GameUpdate(GameState* gs) {
 	}
 
 	// Debug
-	if (IsKeyPressed(KEY_BACKSPACE)) {
+	if (IsKeyPressed(KEY_EQUAL)) {
 		__debugbreak();
 	}
 }
