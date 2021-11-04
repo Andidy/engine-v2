@@ -7,6 +7,7 @@
 #include <deque>
 #include <unordered_map>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 
 #include "raylib.h"

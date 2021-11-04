@@ -17,6 +17,18 @@ static std::string texture_extension = ".png";
 
 static void Button000(GameState* gs);
 
+struct EntitySpawnContext {
+	bool is_active = false;
+
+	bool renderable = false;
+	size_t texture_handle = 0;
+	Color color = WHITE;
+
+	bool grid_transform = false;
+	char* gt_input = NULL;
+};
+static void Button001(GameState* gs, EntitySpawnContext* esc);
+
 void DrawGridLines(GameState& gs) {
 	float spacing = gs.entity_scale;
 
@@ -74,7 +86,6 @@ int main(void) {
 	Vector2 anchor01 = gs.origin_debug_region;
 	Vector2 anchor02 = gs.origin_debug_region2;
 
-	const char* Button000Text = "Spawn Entity";
 	const char* ValueBox001Text = "";
 	char label002text[64] = {};
 	char label003text[64] = {};
@@ -83,13 +94,50 @@ int main(void) {
 
 	int ValueBox001Value = 0;
 
-	Rectangle layoutRecs[6] = {
-		{ anchor01.x + 10, anchor01.y + 10, 125, 30 },
-		{ anchor01.x + 10, anchor01.y + 45, 125, 25 },
+	Rectangle layoutRecs[5] = {
+		{ anchor01.x + 10, anchor01.y + 10, 125, 25 },
 		{ anchor01.x + 10, anchor01.y + 75, 125, 25 },
 		{ anchor01.x + 10, anchor01.y + 95, 125, 25 },
 		{ anchor01.x + 10, anchor01.y + 115, 125, 25 },
 		{ anchor01.x + 10, anchor01.y + 135, 125, 25 }
+	};
+
+	// Entity Spawner variables
+	//----------------------------------------------------------------------------------
+	Vector2 anchor_EntitySpawner = { anchor01.x, 220 };
+	
+	const char* WindowBox_EntitySpawnerText = "Entity Spawner";
+	const char* CheckBoxEx_RenderableText = "Renderable";
+	const char* CheckBoxEx_EntitySpawner_is_activeText = "is_active";
+	const char* CheckBoxEx_EntitySpawner_GridTransformText = "Grid Transform";
+	const char* Spinner_EntitySpawner_texture_selectText = "Texture Select";
+	const char* Button_EntitySpawner_spawn_entityText = "Spawn Entity";
+
+	bool WindowBox_EntitySpawnerActive = true;
+	bool CheckBoxEx_RenderableChecked = false;
+	bool CheckBoxEx_EntitySpawner_is_activeChecked = false;
+	bool Spinner_EntitySpawner_texture_selectEditMode = false;
+	int Spinner_EntitySpawner_texture_selectValue = 0;
+	Color ColorPicker_EntitySpawner_tint_colorValue = WHITE;
+	bool CheckBoxEx_EntitySpawner_GridTransformChecked = false;
+	bool TextBox_EntitySpawner_grid_posEditMode = false;
+
+	const int entity_spawner_grid_pos_text_size = 128;
+	char TextBox_EntitySpawner_grid_posText[entity_spawner_grid_pos_text_size] = "x_pos, y_pos";
+
+	// Define controls rectangles
+	Rectangle entity_spawner_layoutRecs[11] = {
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 200, 390 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 60, 12, 12 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 40, 200, 25 },
+		{ anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 80, 175, 25 },
+		{ anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 110, 145, 145 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 260, 200, 20 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 280, 12, 12 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 125, 25 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 330, 125, 25 },
+		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 125, 25 },
 	};
 	//----------------------------------------------------------------------------------
 
@@ -152,21 +200,60 @@ int main(void) {
 
 		// raygui: controls drawing
 		//----------------------------------------------------------------------------------
-		if (GuiButton(layoutRecs[0], Button000Text)) Button000(&gs);
-		
-		GuiValueBox(layoutRecs[1], ValueBox001Text, &ValueBox001Value, 0, 100, false);
+		GuiValueBox(layoutRecs[0], ValueBox001Text, &ValueBox001Value, 0, 100, false);
 		
 		snprintf(label002text, 64, "Mouse Pos: %f, %f", gs.mouse_pos.x, gs.mouse_pos.y);
-		GuiLabel(layoutRecs[2], label002text);
+		GuiLabel(layoutRecs[1], label002text);
 		
 		snprintf(label003text, 64, "World Pos: %f, %f", gs.world_pos.x, gs.world_pos.y);
-		GuiLabel(layoutRecs[3], label003text);
+		GuiLabel(layoutRecs[2], label003text);
 
 		snprintf(label004text, 64, "Grid Pos: %d, %d", gs.grid_pos.x, gs.grid_pos.y);
-		GuiLabel(layoutRecs[4], label004text);
+		GuiLabel(layoutRecs[3], label004text);
 
 		snprintf(label005text, 64, "Selected Entity: %d", gs.selected_entity);
-		GuiLabel(layoutRecs[5], label005text);
+		GuiLabel(layoutRecs[4], label005text);
+
+		// Entity Spawner
+		if (WindowBox_EntitySpawnerActive) {
+			WindowBox_EntitySpawnerActive = !GuiWindowBox(entity_spawner_layoutRecs[0], WindowBox_EntitySpawnerText);
+			
+			CheckBoxEx_EntitySpawner_is_activeChecked = GuiCheckBox(entity_spawner_layoutRecs[2], CheckBoxEx_EntitySpawner_is_activeText, CheckBoxEx_EntitySpawner_is_activeChecked);
+			
+			GuiLine(entity_spawner_layoutRecs[3], NULL);
+			
+			CheckBoxEx_RenderableChecked = GuiCheckBox(entity_spawner_layoutRecs[1], CheckBoxEx_RenderableText, CheckBoxEx_RenderableChecked);
+			if (GuiSpinner(entity_spawner_layoutRecs[4], Spinner_EntitySpawner_texture_selectText, &Spinner_EntitySpawner_texture_selectValue, 
+				0, 100, Spinner_EntitySpawner_texture_selectEditMode)) {
+				Spinner_EntitySpawner_texture_selectEditMode = !Spinner_EntitySpawner_texture_selectEditMode;
+			}
+
+			ColorPicker_EntitySpawner_tint_colorValue = GuiColorPicker(entity_spawner_layoutRecs[5], ColorPicker_EntitySpawner_tint_colorValue);
+			
+			GuiLine(entity_spawner_layoutRecs[6], NULL);
+			
+			CheckBoxEx_EntitySpawner_GridTransformChecked = GuiCheckBox(entity_spawner_layoutRecs[7], CheckBoxEx_EntitySpawner_GridTransformText,
+				CheckBoxEx_EntitySpawner_GridTransformChecked);
+			
+			if (GuiTextBox(entity_spawner_layoutRecs[8], TextBox_EntitySpawner_grid_posText, entity_spawner_grid_pos_text_size, TextBox_EntitySpawner_grid_posEditMode)) {
+				TextBox_EntitySpawner_grid_posEditMode = !TextBox_EntitySpawner_grid_posEditMode;
+			}
+
+			if (GuiButton(entity_spawner_layoutRecs[9], Button_EntitySpawner_spawn_entityText)) {
+				Button000(&gs);
+			}
+
+			EntitySpawnContext esc = {};
+			esc.is_active = CheckBoxEx_EntitySpawner_is_activeChecked;
+			esc.renderable = CheckBoxEx_RenderableChecked;
+			esc.texture_handle = (size_t)Spinner_EntitySpawner_texture_selectValue;
+			esc.color = ColorPicker_EntitySpawner_tint_colorValue;
+			esc.grid_transform = CheckBoxEx_EntitySpawner_GridTransformChecked;
+			esc.gt_input = TextBox_EntitySpawner_grid_posText;
+			if (GuiButton(entity_spawner_layoutRecs[10], Button_EntitySpawner_spawn_entityText)) {
+				Button001(&gs, &esc);
+			}
+		}
 
 		//----------------------------------------------------------------------------------
 
@@ -235,6 +322,43 @@ static void Button000(GameState* gs) {
 	e.grid_transform = i_g_t;
 	e.renderable = i_r;
 	e.unit = i_u;
+
+	gs->entities.push_back(e);
+}
+
+static void Button001(GameState* gs, EntitySpawnContext* esc) {
+	// Spawn entity at random position
+	std::string gt_input(esc->gt_input);
+	std::string ignore;
+	std::stringstream stream(gt_input);
+	
+	cGridTransform gt = {};
+	stream >> gt.pos.x >> ignore >> gt.pos.y;
+	size_t i_g_t = gs->c_grid_transforms.size();
+	gs->c_grid_transforms.push_back(gt);
+
+	cRenderable r = { { (float)(gt.pos.x * gs->entity_scale), (float)(gt.pos.y * gs->entity_scale) }, esc->texture_handle, esc->color };
+	size_t i_r = gs->c_renderables.size();
+	gs->c_renderables.push_back(r);
+
+	/*
+	cUnit u;
+	u.waypoint_active = false;
+	u.waypoint_pos.push_back({ 0,0 });
+	u.waypoint_pos.push_back({ 1,1 });
+	u.waypoint_pos.push_back({ 2,2 });
+	size_t i_u = gs->c_units.size();
+	gs->c_units.push_back(u);
+	*/
+
+	Entity e = {};
+	e.id = gs->entity_id_counter++;
+	e.is_active = esc->is_active;
+	e.name = "Box";
+	e.grid_transform = i_g_t;
+	e.renderable = i_r;
+	//e.unit = i_u;
+	e.unit = -1;
 
 	gs->entities.push_back(e);
 }

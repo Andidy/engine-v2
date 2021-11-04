@@ -1,0 +1,27 @@
+#
+# rgl layout text file (v2.1) - raygui layout file generated using rGuiLayout
+#
+# Number of controls:     9
+#
+# Ref. window:    r <x> <y> <width> <height>
+# Anchor info:    a <id> <name> <posx> <posy> <enabled>
+# Control info:   c <id> <type> <name> <rectangle> <anchor_id> <text>
+#
+r 0 0 -1 -1
+a 000 anchorMain 0 0 0
+a 001 anchor_EntitySpawner 440 125 1
+a 002 anchor02 0 0 0
+a 003 anchor03 0 0 0
+a 004 anchor04 0 0 0
+a 005 anchor05 0 0 0
+a 006 anchor06 0 0 0
+a 007 anchor07 0 0 0
+c 000 0 WindowBox_EntitySpawner 0 0 200 335 1 Entity Spawner
+c 001 8 CheckBoxEx_Renderable 5 60 12 12 1 Renderable
+c 002 8 CheckBoxEx_EntitySpawner_is_active 5 30 12 12 1 is_active
+c 003 2 Line_EntitySpawner 0 40 200 25 1 
+c 004 16 Spinner_EntitySpawner_texture_select 15 80 175 25 1 
+c 005 23 ColorPicker_EntitySpawner_tint_color 15 110 145 145 1 
+c 006 2 Line_EntitySpawner_2 0 260 200 20 1 
+c 007 8 CheckBoxEx_EntitySpawner_GridTransform 5 280 12 12 1 Grid Transform
+c 008 13 TextBox_EntitySpawner_grid_pos 5 300 125 25 1 x_pos, y_pos
