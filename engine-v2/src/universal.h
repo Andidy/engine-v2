@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <deque>
 #include <unordered_map>
 #include <fstream>
 #include <iostream>
