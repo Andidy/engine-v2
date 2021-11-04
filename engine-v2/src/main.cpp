@@ -65,10 +65,6 @@ int main(void) {
 	bool test = false;
 
 	GameState gs;
-
-	std::string entity_name = "Box";
-	cGridTransform gt = { 0,0 };
-	
 	
 	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish) / std::filesystem::path(gui_style_extension);
 	GuiLoadStyle(gui_style_path.string().c_str());
