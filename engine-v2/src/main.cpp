@@ -66,7 +66,7 @@ int main(void) {
 
 	GameState gs;
 	
-	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish) / std::filesystem::path(gui_style_extension);
+	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish + gui_style_extension);
 	GuiLoadStyle(gui_style_path.string().c_str());
 
 	// my_layout: controls initialization
