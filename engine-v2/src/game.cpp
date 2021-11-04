@@ -83,9 +83,8 @@ void GameUpdate(GameState* gs) {
 			gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y += 1;
 		}
 
-		gs->c_transforms[gs->entities[gs->selected_entity].transform].pos.x = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x * gs->entity_scale;
-		gs->c_transforms[gs->entities[gs->selected_entity].transform].pos.y = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y * gs->entity_scale;
-
+		gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.x = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x * gs->entity_scale;
+		gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.y = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y * gs->entity_scale;
 	}
 
 	if (IsKeyPressed(KEY_O)) {
@@ -115,9 +114,9 @@ void WriteEntityToFile(GameState* gs) {
 		file << "\tname = " << e.name << " ;\n";
 		file << "\tid = " << e.id << " ;\n";
 		file << "\tis_active = " << e.is_active << " ;\n";
-		file << "\t" << gs->c_transforms[e.transform].ToString() << "\n";
 		file << "\t" << gs->c_grid_transforms[e.grid_transform].ToString() << "\n";
 		file << "\t" << gs->c_renderables[e.renderable].ToString() << "\n";
+		file << "\t" << gs->c_units[e.renderable].ToString() << "\n";
 		file << "];\n";
 	}
 
@@ -172,41 +171,57 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 				else if (file_contents == "component") {
 					// we found a component to load
 					file >> file_contents;
-					if (file_contents == "transform") {
+					if (file_contents == "grid_transform") {
 						// ignore the "= ["
 						file >> ignore_string >> ignore_string;
-						// need to load the transform component
-						cTransform t;
-						file >> t.pos.x >> ignore_string >> t.pos.y;
-						int transform_index = gs->c_transforms.size();
-						gs->c_transforms.push_back(t);
-						e->transform = transform_index;
-						// ignore the "] ;"
-						file >> ignore_string >> ignore_string;
-					}
-					else if (file_contents == "grid_transform") {
-						// ignore the "= ["
-						file >> ignore_string >> ignore_string;
+						
 						// need to load the grid_transform component
 						cGridTransform t;
 						file >> t.pos.x >> ignore_string >> t.pos.y;
+						
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
 						int transform_index = gs->c_grid_transforms.size();
 						gs->c_grid_transforms.push_back(t);
 						e->grid_transform = transform_index;
-						// ignore the "] ;"
-						file >> ignore_string >> ignore_string;
 					}
 					else if (file_contents == "renderable") {
 						// ignore the "= ["
 						file >> ignore_string >> ignore_string;
+						
 						// need to load the renderable component
 						cRenderable r;
-						file >> r.texture_handle >> ignore_string >> r.tint_color;
+						file >> r.pos.x >> ignore_string >> r.pos.y >> ignore_string >> r.texture_handle >> ignore_string >> r.tint_color;
+						
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
 						int renderable_index = gs->c_renderables.size();
 						gs->c_renderables.push_back(r);
 						e->renderable = renderable_index;
+					}
+					else if (file_contents == "unit") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+						
+						// need to load the renderable component
+						cUnit u;
+						size_t num_waypoints = 0;
+						file >> u.waypoint_active >> ignore_string >> num_waypoints >> ignore_string;
+
+						for (int i = 0; i < num_waypoints; i++) {
+							Vector2 v = {};
+							file >> v.x >> ignore_string >> v.y >> ignore_string;
+							u.waypoint_pos.push_back(v);
+						}
+					    
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
+						
+						int unit_index = gs->c_units.size();
+						gs->c_units.push_back(u);
+						e->unit = unit_index;
 					}
 				}
 				else if (file_contents == "];") {

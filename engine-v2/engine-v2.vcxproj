@@ -170,24 +170,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\components.h" />
     <ClInclude Include="src\IVector2.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\game_state.h" />
-    <ClInclude Include="src\grid_transform.h" />
-    <ClInclude Include="src\items.h" />
     <ClInclude Include="src\raylib_cpp_helpers.h" />
-    <ClInclude Include="src\renderable.h" />
-    <ClInclude Include="src\units.h" />
     <ClInclude Include="src\universal.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\components.cpp" />
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\game.cpp" />
-    <ClCompile Include="src\grid_transform.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\raylib_cpp_helpers.cpp" />
-    <ClCompile Include="src\renderable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\raysan5\raylib.vcxproj">

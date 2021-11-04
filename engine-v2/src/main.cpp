@@ -67,11 +67,8 @@ int main(void) {
 	GameState gs;
 
 	std::string entity_name = "Box";
-	cTransform t = { 0, 0 };
 	cGridTransform gt = { 0,0 };
 	
-	gs.blueprint_transforms.insert({"Box", t});
-	gs.blueprint_grid_transforms.insert({ "Box", gt });
 	
 	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish) / std::filesystem::path(gui_style_extension);
 	GuiLoadStyle(gui_style_path.string().c_str());
@@ -114,7 +111,7 @@ int main(void) {
 	// LoadTextureFromFile(gs, tex_name);
 
 	//----------------------------------------------------------------------------------
-	
+
 	while (!WindowShouldClose()) {
 		GameUpdate(&gs);
 
@@ -130,7 +127,8 @@ int main(void) {
 		DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
 		for (Entity& e : gs.entities) {
-			DrawTextureEx(gs.textures[gs.c_renderables[e.renderable].texture_handle], gs.c_transforms[e.transform].pos, 0.0f, 1.0f, gs.c_renderables[e.renderable].tint_color);
+			cRenderable& r = gs.c_renderables[e.renderable];
+			DrawTextureEx(gs.textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
 		}
 
 		EndMode2D();
@@ -219,23 +217,28 @@ static void Button000(GameState* gs) {
 	gt.pos.x = (rand() % (int)(max.x - min.x)) + min.x;
 	gt.pos.y = (rand() % (int)(max.y - min.y)) + min.y;
 
-	cTransform t = { (float)(gt.pos.x * gs->entity_scale), (float)(gt.pos.y * gs->entity_scale) };
-	size_t i_t = gs->c_transforms.size();
-	gs->c_transforms.push_back(t);
 	size_t i_g_t = gs->c_grid_transforms.size();
 	gs->c_grid_transforms.push_back(gt);
 
-	cRenderable r;
+	cRenderable r = { { (float)(gt.pos.x * gs->entity_scale), (float)(gt.pos.y * gs->entity_scale) }, 0, WHITE };
 	size_t i_r = gs->c_renderables.size();
 	gs->c_renderables.push_back(r);
+
+	cUnit u;
+	u.waypoint_active = false;
+	u.waypoint_pos.push_back({ 0,0 });
+	u.waypoint_pos.push_back({ 1,1 });
+	u.waypoint_pos.push_back({ 2,2 });
+	size_t i_u = gs->c_units.size();
+	gs->c_units.push_back(u);
 
 	Entity e = {};
 	e.id = gs->entity_id_counter++;
 	e.is_active = true;
 	e.name = "Box";
-	e.transform = i_t;
 	e.grid_transform = i_g_t;
 	e.renderable = i_r;
+	e.unit = i_u;
 
 	gs->entities.push_back(e);
 }

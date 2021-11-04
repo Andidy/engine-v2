@@ -2,8 +2,7 @@
 
 #include "universal.h"
 
-#include "grid_transform.h"
-#include "renderable.h"
+#include "components.h"
 #include "entity.h"
 
 struct GameState {
@@ -12,15 +11,15 @@ struct GameState {
 	std::vector<Texture2D> textures;
 
 	// Entities and Components
-	std::unordered_map<std::string, cTransform> blueprint_transforms;
 	std::unordered_map<std::string, cGridTransform> blueprint_grid_transforms;
 	std::unordered_map<std::string, cRenderable> blueprint_renderables;
+	std::unordered_map<std::string, cUnit> blueprint_units;
 	
 	int64_t entity_id_counter = 0;
 	std::vector<Entity> entities;
-	std::vector<cTransform> c_transforms;
 	std::vector<cGridTransform> c_grid_transforms;
 	std::vector<cRenderable> c_renderables;
+	std::vector<cUnit> c_units;
 
 	int32_t selected_entity = 0;
 
