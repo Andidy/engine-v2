@@ -2,8 +2,8 @@
 # It should be converted into Github issues eventually
 
 # Engine ---
-- Component Saving / Loading
-- Entity Saving / Loading
+- Component Saving / Loading X
+- Entity Saving / Loading X
 - Component Blueprints
 - Entity Blueprints
 - File format / Specification for Entities/Components/Blueprints on disk
@@ -14,14 +14,14 @@
 # Game ---
 - ECS (how much who knows?)
 - 2D Graphics
-  - Texture loading
+  - Texture loading X
   - Sprite Animation
   - Debug view
     - event regions
     - quest visualizer?
     - entity/component/unit/map inspector
 - Grid system
-  - AABB (mouse handling)
+  - AABB (mouse handling X)
   - Pathfinding
     - Grids probably small and turn-based, A* likely fine?
   - full undo and redo support for actions
