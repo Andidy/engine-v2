@@ -347,3 +347,4 @@ raysan5/*
 build/*
 engine-v2/entity.txt
 engine-v2/assets/gfx
+engine-v2/assets/gui/layout/*.c

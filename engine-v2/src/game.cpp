@@ -43,10 +43,6 @@ void GameUpdate(GameState* gs) {
 		}
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		__debugbreak();
-	}
-
 	// Update the mouse position
 	gs->mouse_pos = GetMousePosition();
 	
@@ -64,27 +60,39 @@ void GameUpdate(GameState* gs) {
 	if (gs->entities.size() >= 1) {
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			for (int i = 0; i < gs->entities.size(); i++) {
-				if (gs->grid_pos == gs->c_grid_transforms[gs->entities[i].grid_transform].pos) {
-					gs->selected_entity = i;
+				if (gs->entities[i].grid_transform >= 0) {
+					if (gs->grid_pos == gs->c_grid_transforms[gs->entities[i].grid_transform].pos) {
+						gs->selected_entity = i;
+					}
 				}
 			}
 		}
-		
+
 		if (IsKeyPressed(KEY_A)) {
-			gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x -= 1;
+			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
+				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x -= 1;
+			}
 		}
 		if (IsKeyPressed(KEY_D)) {
-			gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x += 1;
+			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
+				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x += 1;
+			}
 		}
 		if (IsKeyPressed(KEY_W)) {
-			gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y -= 1;
+			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
+				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y -= 1;
+			}
 		}
 		if (IsKeyPressed(KEY_S)) {
-			gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y += 1;
+			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
+				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y += 1;
+			}
 		}
 
-		gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.x = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x * gs->entity_scale;
-		gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.y = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y * gs->entity_scale;
+		if ((gs->entities[gs->selected_entity].renderable >= 0) && (gs->entities[gs->selected_entity].grid_transform >= 0)) {
+			gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.x = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x * gs->entity_scale;
+			gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.y = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y * gs->entity_scale;
+		}
 	}
 
 	if (IsKeyPressed(KEY_O)) {
@@ -99,7 +107,7 @@ void GameUpdate(GameState* gs) {
 	}
 
 	// Debug
-	if (IsKeyPressed(KEY_BACKSPACE)) {
+	if (IsKeyPressed(KEY_EQUAL)) {
 		__debugbreak();
 	}
 }
