@@ -136,36 +136,42 @@ int main(void) {
 
 	// Define controls rectangles
 	Rectangle entity_spawner_layoutRecs[15] = {
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 250, 455 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 455 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 90, 12, 12 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 70, 250, 25 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 70, 275, 25 },
 		{ anchor_EntitySpawner.x + 90, anchor_EntitySpawner.y + 100, 100, 25 },
 		{ anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 135, 145, 145 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 280, 250, 20 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 280, 275, 20 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 12, 12 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 320, 125, 25 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 340, 250, 20 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 340, 275, 20 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 12, 12 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 370, 250, 20 },
+		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 370, 275, 20 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 420, 125, 25 },
 		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 50, 125, 25 },
 	};
 	//----------------------------------------------------------------------------------
 
-	RenderTexture2D render_texture = LoadRenderTexture(800, 600);
+	RenderTexture2D render_texture = LoadRenderTexture(gs.game_width, gs.game_height);
 
 	// Load Texture Assets
 	//----------------------------------------------------------------------------------
 
 	// Load a pure magenta texture to act as the debug texture in slot 0.
 	gs.texture_handles.insert({ "Debug", 0 });
-	gs.textures.push_back(LoadTextureFromImage(GenImageColor(10, 10, MAGENTA)));
+	gs.textures.push_back(LoadTextureFromImage(GenImageColor(gs.entity_scale, gs.entity_scale, MAGENTA)));
 	
 	// std::string tex_name = "Tex0.png";
 	// This will load "assets/gfx/Tex0.png"
 	// LoadTextureFromFile(gs, tex_name);
+	std::string tex0 = "grass";
+	std::string tex1 = "tree";
+	std::string tex2 = "water";
+	LoadTextureFromFile(gs, tex0);
+	LoadTextureFromFile(gs, tex1);
+	LoadTextureFromFile(gs, tex2);
 
 	//----------------------------------------------------------------------------------
 
@@ -200,7 +206,7 @@ int main(void) {
 		// Draw Game Region ===================================================
 		
 		DrawRectangleLines(gs.game_window.x-1, gs.game_window.y-1, gs.game_window.width+2, gs.game_window.height+2, GRAY);
-		DrawTexturePro(render_texture.texture, { 0, 0, 800, -600 }, gs.game_window, {0, 0}, 0.0f, WHITE);
+		DrawTexturePro(render_texture.texture, { 0, 0, gs.game_width, -gs.game_height }, gs.game_window, {0, 0}, 0.0f, WHITE);
 		
 		// Draw Debug Region ==================================================
 		DrawText("This is the debug window", anchor01.x + 10, anchor01.y + 200, 20, LIGHTGRAY);
@@ -284,7 +290,7 @@ int main(void) {
 			}
 
 			Vector2 texture_preview_pos = { entity_spawner_layoutRecs[4].x + entity_spawner_layoutRecs[4].width + 5, entity_spawner_layoutRecs[4].y };
-			DrawTextureEx(gs.textures[Spinner_EntitySpawner_texture_selectValue], texture_preview_pos, 0.0f, 5.0f, ColorPicker_EntitySpawner_tint_colorValue);
+			DrawTextureEx(gs.textures[Spinner_EntitySpawner_texture_selectValue], texture_preview_pos, 0.0f, 2.0f, ColorPicker_EntitySpawner_tint_colorValue);
 		}
 
 		//----------------------------------------------------------------------------------
