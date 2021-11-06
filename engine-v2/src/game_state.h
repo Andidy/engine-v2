@@ -23,7 +23,7 @@ struct GameState {
 
 	int32_t selected_entity = 0;
 
-	int entity_scale = 10;
+	int entity_scale = 32;
 
 	// Camera and UI Information ==============================================
 	Vector2 mouse_pos = {};
@@ -31,8 +31,8 @@ struct GameState {
 	IVector2 grid_pos = {};
 
 	const Vector2 game_origin = { 25, 25 };
-	const float game_width = 800;
-	const float game_height = 600;
+	const float game_width = 640;
+	const float game_height = 480;
 	const Rectangle game_window = { game_origin.x, game_origin.y, game_width, game_height };
 	const Vector2 origin_debug_region = { game_origin.x + game_width, 0 };
 	const Vector2 origin_debug_region2 = { 10, game_origin.y + game_height };
