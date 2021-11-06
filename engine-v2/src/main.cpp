@@ -2,6 +2,7 @@
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "raygui_helpers.h"
 
 #include "game_state.h"
 #include "game.h"
@@ -89,69 +90,103 @@ int main(void) {
 	Vector2 anchor01 = gs.origin_debug_region;
 	Vector2 anchor02 = gs.origin_debug_region2;
 
-	const char* ValueBox001Text = "";
-	char label002text[64] = {};
-	char label003text[64] = {};
-	char label004text[64] = {};
-	char label005text[64] = {};
+	gui::LabelContext label_mouse_pos = {};
+	label_mouse_pos.bounds = { anchor01.x + 10, anchor01.y + 10, 125, 25 };
+	label_mouse_pos.text = (char*)calloc(64, sizeof(char));
 
-	int ValueBox001Value = 0;
+	gui::LabelContext label_world_pos = {};
+	label_world_pos.bounds = { anchor01.x + 10, anchor01.y + 30, 125, 25 };
+	label_world_pos.text = (char*)calloc(64, sizeof(char));
 
-	Rectangle layoutRecs[5] = {
-		{ anchor01.x + 10, anchor01.y + 10, 125, 25 },
-		{ anchor01.x + 10, anchor01.y + 75, 125, 25 },
-		{ anchor01.x + 10, anchor01.y + 95, 125, 25 },
-		{ anchor01.x + 10, anchor01.y + 115, 125, 25 },
-		{ anchor01.x + 10, anchor01.y + 135, 125, 25 }
-	};
+	gui::LabelContext label_grid_pos = {};
+	label_grid_pos.bounds = { anchor01.x + 10, anchor01.y + 50, 125, 25 };
+	label_grid_pos.text = (char*)calloc(64, sizeof(char));
+
+	gui::LabelContext label_selected_entity = {};
+	label_selected_entity.bounds = { anchor01.x + 10, anchor01.y + 70, 125, 25 };
+	label_selected_entity.text = (char*)calloc(64, sizeof(char));
+
+	gui::LabelContext label_num_entities = {};
+	label_num_entities.bounds = { anchor01.x + 10, anchor01.y + 90, 125, 25 };
+	label_num_entities.text = (char*)calloc(64, sizeof(char));
 
 	// Entity Spawner variables
 	//----------------------------------------------------------------------------------
 	Vector2 anchor_EntitySpawner = { anchor01.x + 10, 220 };
 	
-	const char* WindowBox_EntitySpawnerText = "Entity Spawner";
-	const char* CheckBoxEx_RenderableText = "Renderable";
-	const char* CheckBoxEx_EntitySpawner_is_activeText = "is_active";
-	const char* CheckBoxEx_EntitySpawner_GridTransformText = "Grid Transform";
-	const char* CheckBoxEx_EntitySpawner_UnitText = "Unit";
-	const char* Spinner_EntitySpawner_texture_selectText = "Texture Select";
-	const char* Button_EntitySpawner_spawn_entityText = "Spawn Entity";
-	const char* Button_EntitySpawner_spawn_random_entityText = "Spawn Random Entity";
-
-	bool WindowBox_EntitySpawnerActive = true;
-	bool CheckBoxEx_RenderableChecked = false;
-	bool CheckBoxEx_EntitySpawner_is_activeChecked = false;
-	bool Spinner_EntitySpawner_texture_selectEditMode = false;
-	int Spinner_EntitySpawner_texture_selectValue = 0;
-	Color ColorPicker_EntitySpawner_tint_colorValue = WHITE;
-	bool CheckBoxEx_EntitySpawner_GridTransformChecked = false;
-	bool CheckBoxEx_EntitySpawner_UnitChecked = false;
-	bool TextBox_EntitySpawner_grid_posEditMode = false;
-
 	const int entity_spawner_text_size = 128;
-	char TextBox_EntitySpawner_grid_posText[entity_spawner_text_size] = "x, y";
 
-	bool TextBox_EntitySpawner_entity_nameEditMode = false;
-	char TextBox_EntitySpawner_entity_nameText[entity_spawner_text_size] = "Unnamed";
+	gui::WindowBoxContext window_entity_spawner = {};
+	window_entity_spawner.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 455 };
+	window_entity_spawner.is_active = true;
+	window_entity_spawner.text = "Entity Spawner";
 
-	// Define controls rectangles
-	Rectangle entity_spawner_layoutRecs[15] = {
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 455 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 90, 12, 12 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 70, 275, 25 },
-		{ anchor_EntitySpawner.x + 90, anchor_EntitySpawner.y + 100, 100, 25 },
-		{ anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 135, 145, 145 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 280, 275, 20 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 12, 12 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 320, 125, 25 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 340, 275, 20 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 12, 12 },
-		{ anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 370, 275, 20 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 420, 125, 25 },
-		{ anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 50, 125, 25 },
-	};
+	gui::CheckBoxContext checkbox_renderable = {};
+	checkbox_renderable.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 90, 12, 12 };
+	checkbox_renderable.checked = false;
+	checkbox_renderable.text = "Renderable";
+
+	gui::CheckBoxContext checkbox_grid_transform = {};
+	checkbox_grid_transform.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 12, 12 };
+	checkbox_grid_transform.checked = false;
+	checkbox_grid_transform.text = "Grid Transform";
+
+	gui::CheckBoxContext checkbox_unit = {};
+	checkbox_unit.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 12, 12 };
+	checkbox_unit.checked = false;
+	checkbox_unit.text = "Unit";
+
+	gui::CheckBoxContext checkbox_is_active = {};
+	checkbox_is_active.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 };
+	checkbox_is_active.checked = false;
+	checkbox_is_active.text = "is_active";
+
+	gui::LineContext line_0 = {};
+	line_0.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 80, 275, 25 };
+
+	gui::LineContext line_1 = {};
+	line_1.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 290, 275, 20 };
+
+	gui::LineContext line_2 = {};
+	line_2.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 350, 275, 20 };
+
+	gui::LineContext line_3 = {};
+	line_3.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 380, 275, 20 };
+
+	gui::ColorPickerContext color_picker_entity_spawner = {};
+	color_picker_entity_spawner.bounds = { anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 135, 145, 145 };
+	color_picker_entity_spawner.color = WHITE;
+
+	gui::TextBoxContext textbox_entity_name = {};
+	textbox_entity_name.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 50, 125, 25 };
+	textbox_entity_name.edit_mode = false;
+	textbox_entity_name.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
+	strcpy_s(textbox_entity_name.text, entity_spawner_text_size, "Unnamed");
+	textbox_entity_name.text_size = entity_spawner_text_size;
+
+	gui::TextBoxContext textbox_grid_pos = {};
+	textbox_grid_pos.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 320, 125, 25 };
+	textbox_grid_pos.edit_mode = false;
+	textbox_grid_pos.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
+	strcpy_s(textbox_grid_pos.text, entity_spawner_text_size, "x, y");
+	textbox_grid_pos.text_size = entity_spawner_text_size;
+
+	gui::SpinnerContext spinner_texture_select = {};
+	spinner_texture_select.bounds = { anchor_EntitySpawner.x + 90, anchor_EntitySpawner.y + 100, 100, 25 };
+	spinner_texture_select.edit_mode = false;
+	spinner_texture_select.text = "Texture Select";
+	spinner_texture_select.value = 0;
+	spinner_texture_select.min = 0;
+	spinner_texture_select.max = gs.textures.size() - 1;
+
+	gui::ButtonContext button_spawn_entity = {};
+	button_spawn_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 };
+	button_spawn_entity.text = "Spawn Entity";
+
+	gui::ButtonContext button_spawn_random_entity = {};
+	button_spawn_random_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 420, 125, 25 };
+	button_spawn_random_entity.text = "Spawn Random Entity";
+
 	//----------------------------------------------------------------------------------
 
 	RenderTexture2D render_texture = LoadRenderTexture(gs.game_width, gs.game_height);
@@ -177,8 +212,6 @@ int main(void) {
 
 	while (!WindowShouldClose()) {
 		GameUpdate(&gs);
-
-		ValueBox001Value = gs.entities.size();
 
 		// Rendering Code =====================================================
 		
@@ -222,75 +255,73 @@ int main(void) {
 
 		// raygui: controls drawing
 		//----------------------------------------------------------------------------------
-		GuiValueBox(layoutRecs[0], ValueBox001Text, &ValueBox001Value, 0, 100, false);
+		label_mouse_pos.text.clear();
+		label_mouse_pos.text += "Mouse Pos: ";
+		label_mouse_pos.text += std::to_string(gs.mouse_pos.x);
+		label_mouse_pos.text += ", ";
+		label_mouse_pos.text += std::to_string(gs.mouse_pos.y);
+		gui::Label(label_mouse_pos);
 		
-		snprintf(label002text, 64, "Mouse Pos: %f, %f", gs.mouse_pos.x, gs.mouse_pos.y);
-		GuiLabel(layoutRecs[1], label002text);
-		
-		snprintf(label003text, 64, "World Pos: %f, %f", gs.world_pos.x, gs.world_pos.y);
-		GuiLabel(layoutRecs[2], label003text);
+		label_world_pos.text.clear();
+		label_world_pos.text += "World Pos: ";
+		label_world_pos.text += std::to_string(gs.world_pos.x);
+		label_world_pos.text += ", ";
+		label_world_pos.text += std::to_string(gs.world_pos.y);
+		gui::Label(label_world_pos);
 
-		snprintf(label004text, 64, "Grid Pos: %d, %d", gs.grid_pos.x, gs.grid_pos.y);
-		GuiLabel(layoutRecs[3], label004text);
+		label_grid_pos.text.clear();
+		label_grid_pos.text += "Grid Pos: ";
+		label_grid_pos.text += std::to_string(gs.grid_pos.x);
+		label_grid_pos.text += ", ";
+		label_grid_pos.text += std::to_string(gs.grid_pos.y);
+		gui::Label(label_grid_pos);
 
-		snprintf(label005text, 64, "Selected Entity: %d", gs.selected_entity);
-		GuiLabel(layoutRecs[4], label005text);
+		label_selected_entity.text.clear();
+		label_selected_entity.text += "Selected Entity: ";
+		label_selected_entity.text += std::to_string(gs.selected_entity);
+		gui::Label(label_selected_entity);
+
+		label_num_entities.text.clear();
+		label_num_entities.text += "Num Entities: ";
+		label_num_entities.text += std::to_string(gs.entities.size());
+		gui::Label(label_num_entities);
 
 		// Entity Spawner
-		if (WindowBox_EntitySpawnerActive) {
-			WindowBox_EntitySpawnerActive = !GuiWindowBox(entity_spawner_layoutRecs[0], WindowBox_EntitySpawnerText);
-			
-			CheckBoxEx_EntitySpawner_is_activeChecked = GuiCheckBox(entity_spawner_layoutRecs[2], CheckBoxEx_EntitySpawner_is_activeText, CheckBoxEx_EntitySpawner_is_activeChecked);
-			
-			if (GuiTextBox(entity_spawner_layoutRecs[14], TextBox_EntitySpawner_entity_nameText, entity_spawner_text_size, TextBox_EntitySpawner_entity_nameEditMode)) {
-				TextBox_EntitySpawner_entity_nameEditMode = !TextBox_EntitySpawner_entity_nameEditMode;
-			}
+		if (window_entity_spawner.is_active) {
+			gui::WindowBox(window_entity_spawner);
+			gui::CheckBox(checkbox_is_active);
+			gui::CheckBox(checkbox_renderable);
+			gui::CheckBox(checkbox_grid_transform);
+			gui::CheckBox(checkbox_unit);
+			gui::Line(line_0);
+			gui::Line(line_1);
+			gui::Line(line_2);
+			gui::Line(line_3);
+			gui::ColorPicker(color_picker_entity_spawner);
+			gui::TextBox(textbox_entity_name);
+			gui::TextBox(textbox_grid_pos);
+			gui::Spinner(spinner_texture_select, gs.textures.size() - 1);
 
-			GuiLine(entity_spawner_layoutRecs[3], NULL);
-			
-			CheckBoxEx_RenderableChecked = GuiCheckBox(entity_spawner_layoutRecs[1], CheckBoxEx_RenderableText, CheckBoxEx_RenderableChecked);
-			if (GuiSpinner(entity_spawner_layoutRecs[4], Spinner_EntitySpawner_texture_selectText, &Spinner_EntitySpawner_texture_selectValue, 
-				0, gs.textures.size() - 1, Spinner_EntitySpawner_texture_selectEditMode)) {
-				Spinner_EntitySpawner_texture_selectEditMode = !Spinner_EntitySpawner_texture_selectEditMode;
-			}
-
-			ColorPicker_EntitySpawner_tint_colorValue = GuiColorPicker(entity_spawner_layoutRecs[5], ColorPicker_EntitySpawner_tint_colorValue);
-			
-			GuiLine(entity_spawner_layoutRecs[6], NULL);
-			
-			CheckBoxEx_EntitySpawner_GridTransformChecked = GuiCheckBox(entity_spawner_layoutRecs[7], CheckBoxEx_EntitySpawner_GridTransformText,
-				CheckBoxEx_EntitySpawner_GridTransformChecked);
-			
-			if (GuiTextBox(entity_spawner_layoutRecs[8], TextBox_EntitySpawner_grid_posText, entity_spawner_text_size, TextBox_EntitySpawner_grid_posEditMode)) {
-				TextBox_EntitySpawner_grid_posEditMode = !TextBox_EntitySpawner_grid_posEditMode;
-			}
-
-			GuiLine(entity_spawner_layoutRecs[9], NULL);
-
-			CheckBoxEx_EntitySpawner_UnitChecked = GuiCheckBox(entity_spawner_layoutRecs[10], CheckBoxEx_EntitySpawner_UnitText,
-				CheckBoxEx_EntitySpawner_UnitChecked);
-
-			GuiLine(entity_spawner_layoutRecs[11], NULL);
-
-			if (GuiButton(entity_spawner_layoutRecs[13], Button_EntitySpawner_spawn_random_entityText)) {
+			if (gui::Button(button_spawn_random_entity)) {
 				Button000(&gs);
 			}
 
 			EntitySpawnContext esc = {};
-			esc.is_active = CheckBoxEx_EntitySpawner_is_activeChecked;
-			esc.name_input = TextBox_EntitySpawner_entity_nameText;
-			esc.renderable = CheckBoxEx_RenderableChecked;
-			esc.texture_handle = (size_t)Spinner_EntitySpawner_texture_selectValue;
-			esc.color = ColorPicker_EntitySpawner_tint_colorValue;
-			esc.grid_transform = CheckBoxEx_EntitySpawner_GridTransformChecked;
-			esc.gt_input = TextBox_EntitySpawner_grid_posText;
-			esc.unit = CheckBoxEx_EntitySpawner_UnitChecked;
-			if (GuiButton(entity_spawner_layoutRecs[12], Button_EntitySpawner_spawn_entityText)) {
+			esc.is_active = checkbox_is_active.checked;
+			esc.name_input = textbox_entity_name.text;
+			esc.renderable = checkbox_renderable.checked;
+			esc.texture_handle = (size_t)spinner_texture_select.value;
+			esc.color = color_picker_entity_spawner.color;
+			esc.grid_transform = checkbox_grid_transform.checked;
+			esc.gt_input = textbox_grid_pos.text;
+			esc.unit = checkbox_unit.checked;
+			
+			if (gui::Button(button_spawn_entity)) {
 				Button001(&gs, &esc);
 			}
 
-			Vector2 texture_preview_pos = { entity_spawner_layoutRecs[4].x + entity_spawner_layoutRecs[4].width + 5, entity_spawner_layoutRecs[4].y };
-			DrawTextureEx(gs.textures[Spinner_EntitySpawner_texture_selectValue], texture_preview_pos, 0.0f, 2.0f, ColorPicker_EntitySpawner_tint_colorValue);
+			Vector2 texture_preview_pos = { color_picker_entity_spawner.bounds.x + color_picker_entity_spawner.bounds.width + 40, color_picker_entity_spawner.bounds.y };
+			DrawTextureEx(gs.textures[spinner_texture_select.value], texture_preview_pos, 0.0f, 2.0f, color_picker_entity_spawner.color);
 		}
 
 		//----------------------------------------------------------------------------------
