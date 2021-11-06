@@ -175,6 +175,7 @@
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\game_state.h" />
+    <ClInclude Include="src\raygui_helpers.h" />
     <ClInclude Include="src\raylib_cpp_helpers.h" />
     <ClInclude Include="src\universal.h" />
   </ItemGroup>
@@ -183,6 +184,7 @@
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\raygui_helpers.cpp" />
     <ClCompile Include="src\raylib_cpp_helpers.cpp" />
   </ItemGroup>
   <ItemGroup>
