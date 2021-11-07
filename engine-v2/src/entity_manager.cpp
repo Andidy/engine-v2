@@ -48,8 +48,7 @@ void EntityManager::CreateEntity(EntityContext& ec) {
 	if (ec.renderable) {
 		Vector2 pos = { 0, 0 };
 		if (e.grid_transform >= 0) {
-			pos.x = (float)(GridTransform(e).pos.x * ec.texture_scale);
-			pos.y = (float)(GridTransform(e).pos.y * ec.texture_scale);
+			pos = GridTransform(e).pos * ec.texture_scale;
 		}
 		cRenderable r = { pos, ec.texture_handle, ec.tint_color };
 		e.renderable = AddRenderable(r);
