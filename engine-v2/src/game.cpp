@@ -47,8 +47,7 @@ void GameUpdate(GameState* gs) {
 	gs->mouse_pos = GetMousePosition();
 	
 	Vector2 test = gs->mouse_pos;
-	test.x -= gs->game_origin.x;
-	test.y -= gs->game_origin.y;
+	test -= gs->game_origin;
 	
 	// Convert mouse location to a world position
 	gs->world_pos = GetScreenToWorld2D(test, gs->camera);
@@ -84,8 +83,7 @@ void GameUpdate(GameState* gs) {
 			}
 
 			if (e.renderable >= 0) {
-				gs->em.Renderable(e).pos.x = gs->em.GridTransform(e).pos.x * gs->entity_scale;
-				gs->em.Renderable(e).pos.y = gs->em.GridTransform(e).pos.y * gs->entity_scale;
+				gs->em.Renderable(e).pos = gs->em.GridTransform(e).pos * gs->entity_scale;
 			}
 		}
 	}
