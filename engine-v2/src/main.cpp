@@ -92,23 +92,23 @@ int main(void) {
 
 	gui::LabelContext label_mouse_pos = {};
 	label_mouse_pos.bounds = { anchor01.x + 10, anchor01.y + 10, 125, 25 };
-	label_mouse_pos.text = (char*)calloc(64, sizeof(char));
+	label_mouse_pos.text = {};
 
 	gui::LabelContext label_world_pos = {};
 	label_world_pos.bounds = { anchor01.x + 10, anchor01.y + 30, 125, 25 };
-	label_world_pos.text = (char*)calloc(64, sizeof(char));
+	label_world_pos.text = {};
 
 	gui::LabelContext label_grid_pos = {};
 	label_grid_pos.bounds = { anchor01.x + 10, anchor01.y + 50, 125, 25 };
-	label_grid_pos.text = (char*)calloc(64, sizeof(char));
+	label_grid_pos.text = {};
 
 	gui::LabelContext label_selected_entity = {};
 	label_selected_entity.bounds = { anchor01.x + 10, anchor01.y + 70, 125, 25 };
-	label_selected_entity.text = (char*)calloc(64, sizeof(char));
+	label_selected_entity.text = {};
 
 	gui::LabelContext label_num_entities = {};
 	label_num_entities.bounds = { anchor01.x + 10, anchor01.y + 90, 125, 25 };
-	label_num_entities.text = (char*)calloc(64, sizeof(char));
+	label_num_entities.text = {};
 
 	// Entity Spawner variables
 	//----------------------------------------------------------------------------------
