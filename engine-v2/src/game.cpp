@@ -57,41 +57,36 @@ void GameUpdate(GameState* gs) {
 	gs->grid_pos.x = (int)floorf(gs->world_pos.x / (float)gs->entity_scale);
 	gs->grid_pos.y = (int)floorf(gs->world_pos.y / (float)gs->entity_scale);
 	
-	if (gs->entities.size() >= 1) {
+	if (gs->em.entities.size() >= 1) {
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			for (int i = 0; i < gs->entities.size(); i++) {
-				if (gs->entities[i].grid_transform >= 0) {
-					if (gs->grid_pos == gs->c_grid_transforms[gs->entities[i].grid_transform].pos) {
+			for (int i = 0; i < gs->em.entities.size(); i++) {
+				if (gs->em.entities[i].grid_transform >= 0) {
+					if (gs->grid_pos == gs->em.c_grid_transforms[gs->em.entities[i].grid_transform].pos) {
 						gs->selected_entity = i;
 					}
 				}
 			}
 		}
 
-		if (IsKeyPressed(KEY_A)) {
-			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
-				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x -= 1;
+		Entity& e = gs->em.entities[gs->selected_entity];
+		if (e.grid_transform >= 0) {
+			if (IsKeyPressed(KEY_A)) {
+				gs->em.GridTransform(e).pos.x -= 1;
 			}
-		}
-		if (IsKeyPressed(KEY_D)) {
-			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
-				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x += 1;
+			if (IsKeyPressed(KEY_D)) {
+				gs->em.GridTransform(e).pos.x += 1;
 			}
-		}
-		if (IsKeyPressed(KEY_W)) {
-			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
-				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y -= 1;
+			if (IsKeyPressed(KEY_W)) {
+				gs->em.GridTransform(e).pos.y -= 1;
 			}
-		}
-		if (IsKeyPressed(KEY_S)) {
-			if (gs->entities[gs->selected_entity].grid_transform >= 0) {
-				gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y += 1;
+			if (IsKeyPressed(KEY_S)) {
+				gs->em.GridTransform(e).pos.y += 1;
 			}
-		}
 
-		if ((gs->entities[gs->selected_entity].renderable >= 0) && (gs->entities[gs->selected_entity].grid_transform >= 0)) {
-			gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.x = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.x * gs->entity_scale;
-			gs->c_renderables[gs->entities[gs->selected_entity].renderable].pos.y = gs->c_grid_transforms[gs->entities[gs->selected_entity].grid_transform].pos.y * gs->entity_scale;
+			if (e.renderable >= 0) {
+				gs->em.Renderable(e).pos.x = gs->em.GridTransform(e).pos.x * gs->entity_scale;
+				gs->em.Renderable(e).pos.y = gs->em.GridTransform(e).pos.y * gs->entity_scale;
+			}
 		}
 	}
 
@@ -117,14 +112,20 @@ void GameUpdate(GameState* gs) {
 void WriteEntityToFile(GameState* gs) {
 	std::fstream file("entity.txt", std::ios::out);
 	
-	for (Entity& e : gs->entities) {
+	for (Entity& e : gs->em.entities) {
 		file << "entity = [\n";
 		file << "\tname = " << e.name << " ;\n";
 		file << "\tid = " << e.id << " ;\n";
 		file << "\tis_active = " << e.is_active << " ;\n";
-		file << "\t" << gs->c_grid_transforms[e.grid_transform].ToString() << "\n";
-		file << "\t" << gs->c_renderables[e.renderable].ToString() << "\n";
-		file << "\t" << gs->c_units[e.renderable].ToString() << "\n";
+		if (e.grid_transform != -1) {
+			file << "\t" << gs->em.GridTransform(e).ToString() << "\n";
+		}
+		if (e.renderable != -1) {
+			file << "\t" << gs->em.Renderable(e).ToString() << "\n";
+		}
+		if (e.unit != -1) {
+			file << "\t" << gs->em.Unit(e).ToString() << "\n";
+		}
 		file << "];\n";
 	}
 
@@ -190,9 +191,7 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 
-						int transform_index = gs->c_grid_transforms.size();
-						gs->c_grid_transforms.push_back(t);
-						e->grid_transform = transform_index;
+						e->grid_transform = gs->em.AddGridTransform(t);
 					}
 					else if (file_contents == "renderable") {
 						// ignore the "= ["
@@ -205,9 +204,7 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 
-						int renderable_index = gs->c_renderables.size();
-						gs->c_renderables.push_back(r);
-						e->renderable = renderable_index;
+						e->renderable = gs->em.AddRenderable(r);
 					}
 					else if (file_contents == "unit") {
 						// ignore the "= ["
@@ -227,14 +224,12 @@ void ReadEntityFromFile(GameState* gs, std::string filename) {
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 						
-						int unit_index = gs->c_units.size();
-						gs->c_units.push_back(u);
-						e->unit = unit_index;
+						e->unit = gs->em.AddUnit(u);
 					}
 				}
 				else if (file_contents == "];") {
 					Entity e_final = *e;
-					gs->entities.push_back(e_final);
+					gs->em.entities.push_back(e_final);
 					break;
 				}
 			}

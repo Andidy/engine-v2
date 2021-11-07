@@ -2,6 +2,24 @@
 
 #include "universal.h"
 
+#include "components.h"
+
+struct EntityContext {
+	bool is_active = false;
+	int32_t id = -1;
+	std::string name;
+
+	bool renderable = false;
+	int texture_scale = 0;
+	size_t texture_handle = 0;
+	Color tint_color = WHITE;
+
+	bool grid_transform = false;
+	IVector2 gt_pos = { 0, 0 };
+
+	bool unit = false;
+};
+
 struct Entity {
 	std::string name = "Unnamed";
 	int64_t id = -1;
