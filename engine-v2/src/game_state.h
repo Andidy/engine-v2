@@ -4,9 +4,11 @@
 
 #include "components.h"
 #include "entity.h"
+#include "entity_manager.h"
 
 struct GameState {
 	// Assets / Textures
+	int entity_scale = 32;
 	std::unordered_map<std::string, size_t> texture_handles;
 	std::vector<Texture2D> textures;
 
@@ -15,15 +17,9 @@ struct GameState {
 	std::unordered_map<std::string, cRenderable> blueprint_renderables;
 	std::unordered_map<std::string, cUnit> blueprint_units;
 	
-	int64_t entity_id_counter = 0;
-	std::vector<Entity> entities;
-	std::vector<cGridTransform> c_grid_transforms;
-	std::vector<cRenderable> c_renderables;
-	std::vector<cUnit> c_units;
+	EntityManager em;
 
 	int32_t selected_entity = 0;
-
-	int entity_scale = 32;
 
 	// Camera and UI Information ==============================================
 	Vector2 mouse_pos = {};

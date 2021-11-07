@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\components.h" />
+    <ClInclude Include="src\entity_manager.h" />
     <ClInclude Include="src\IVector2.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\game.h" />
@@ -182,6 +183,7 @@
   <ItemGroup>
     <ClCompile Include="src\components.cpp" />
     <ClCompile Include="src\entity.cpp" />
+    <ClCompile Include="src\entity_manager.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\raygui_helpers.cpp" />

@@ -16,23 +16,6 @@ static std::string gui_layout_extension = ".rgl";
 static std::string gui_style_extension = ".rgs";
 static std::string texture_extension = ".png";
 
-static void Button000(GameState* gs);
-
-struct EntitySpawnContext {
-	bool is_active = false;
-	char* name_input = NULL;
-
-	bool renderable = false;
-	size_t texture_handle = 0;
-	Color color = WHITE;
-
-	bool grid_transform = false;
-	char* gt_input = NULL;
-
-	bool unit = false;
-};
-static void Button001(GameState* gs, EntitySpawnContext* esc);
-
 void DrawGridLines(GameState& gs) {
 	float spacing = gs.entity_scale;
 
@@ -117,7 +100,7 @@ int main(void) {
 	const int entity_spawner_text_size = 128;
 
 	gui::WindowBoxContext window_entity_spawner = {};
-	window_entity_spawner.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 455 };
+	window_entity_spawner.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 425 };
 	window_entity_spawner.is_active = true;
 	window_entity_spawner.text = "Entity Spawner";
 
@@ -183,10 +166,6 @@ int main(void) {
 	button_spawn_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 };
 	button_spawn_entity.text = "Spawn Entity";
 
-	gui::ButtonContext button_spawn_random_entity = {};
-	button_spawn_random_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 420, 125, 25 };
-	button_spawn_random_entity.text = "Spawn Random Entity";
-
 	//----------------------------------------------------------------------------------
 
 	RenderTexture2D render_texture = LoadRenderTexture(gs.game_width, gs.game_height);
@@ -223,9 +202,9 @@ int main(void) {
 
 		DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
-		for (Entity& e : gs.entities) {
+		for (Entity& e : gs.em.entities) {
 			if (e.renderable >= 0) {
-				cRenderable& r = gs.c_renderables[e.renderable];
+				cRenderable& r = gs.em.Renderable(e);
 				DrawTextureEx(gs.textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
 			}
 		}
@@ -283,7 +262,7 @@ int main(void) {
 
 		label_num_entities.text.clear();
 		label_num_entities.text += "Num Entities: ";
-		label_num_entities.text += std::to_string(gs.entities.size());
+		label_num_entities.text += std::to_string(gs.em.entities.size());
 		gui::Label(label_num_entities);
 
 		// Entity Spawner
@@ -301,23 +280,28 @@ int main(void) {
 			gui::TextBox(textbox_entity_name);
 			gui::TextBox(textbox_grid_pos);
 			gui::Spinner(spinner_texture_select, gs.textures.size() - 1);
-
-			if (gui::Button(button_spawn_random_entity)) {
-				Button000(&gs);
-			}
-
-			EntitySpawnContext esc = {};
-			esc.is_active = checkbox_is_active.checked;
-			esc.name_input = textbox_entity_name.text;
-			esc.renderable = checkbox_renderable.checked;
-			esc.texture_handle = (size_t)spinner_texture_select.value;
-			esc.color = color_picker_entity_spawner.color;
-			esc.grid_transform = checkbox_grid_transform.checked;
-			esc.gt_input = textbox_grid_pos.text;
-			esc.unit = checkbox_unit.checked;
 			
 			if (gui::Button(button_spawn_entity)) {
-				Button001(&gs, &esc);
+				IVector2 gt_pos = { 0, 0 };
+				{
+					std::string text = textbox_grid_pos.text;
+					std::string ignore;
+					std::stringstream gt_input_converter(text);
+					gt_input_converter >> gt_pos.x >> ignore >> gt_pos.y;
+				}
+
+				EntityContext ec;
+				ec.is_active = checkbox_is_active.checked;
+				ec.name = textbox_entity_name.text;
+				ec.renderable = checkbox_renderable.checked;
+				ec.texture_scale = gs.entity_scale;
+				ec.texture_handle = (size_t)spinner_texture_select.value;
+				ec.tint_color = color_picker_entity_spawner.color;
+				ec.grid_transform = checkbox_grid_transform.checked;
+				ec.gt_pos = gt_pos;
+				ec.unit = checkbox_unit.checked;
+
+				gs.em.CreateEntity(ec);
 			}
 
 			Vector2 texture_preview_pos = { color_picker_entity_spawner.bounds.x + color_picker_entity_spawner.bounds.width + 40, color_picker_entity_spawner.bounds.y };
@@ -332,90 +316,4 @@ int main(void) {
 	CloseWindow();
 
 	return 0;
-}
-
-static void Button000(GameState* gs) {
-	// Spawn entity at random position
-	cGridTransform gt = gs->blueprint_grid_transforms["Box"];
-
-	Vector2 min = gs->game_origin;
-	min.x -= gs->game_origin.x;
-	min.y -= gs->game_origin.y;
-	min = GetScreenToWorld2D(min, gs->camera);
-	
-	Vector2 max = gs->game_origin;
-	max.x += gs->game_width;
-	max.y += gs->game_height;
-	max.x -= gs->game_origin.x;
-	max.y -= gs->game_origin.y;
-	max = GetScreenToWorld2D(max, gs->camera);
-	
-	max.x /= gs->entity_scale;
-	max.y /= gs->entity_scale;
-	min.x /= gs->entity_scale;
-	min.y /= gs->entity_scale;
-
-	gt.pos.x = (rand() % (int)(max.x - min.x)) + min.x;
-	gt.pos.y = (rand() % (int)(max.y - min.y)) + min.y;
-
-	size_t i_g_t = gs->c_grid_transforms.size();
-	gs->c_grid_transforms.push_back(gt);
-
-	cRenderable r = { { (float)(gt.pos.x * gs->entity_scale), (float)(gt.pos.y * gs->entity_scale) }, 0, WHITE };
-	size_t i_r = gs->c_renderables.size();
-	gs->c_renderables.push_back(r);
-
-	cUnit u;
-	size_t i_u = gs->c_units.size();
-	gs->c_units.push_back(u);
-
-	Entity e = {};
-	e.id = gs->entity_id_counter++;
-	e.is_active = true;
-	e.name = "Box";
-	e.grid_transform = i_g_t;
-	e.renderable = i_r;
-	e.unit = i_u;
-
-	gs->entities.push_back(e);
-}
-
-static void Button001(GameState* gs, EntitySpawnContext* esc) {
-	// Spawn entity at random position
-	cGridTransform gt;
-	int32_t i_gt = -1;
-	if (esc->grid_transform) {
-		std::string gt_input(esc->gt_input);
-		std::string ignore;
-		std::stringstream stream(gt_input);
-
-		stream >> gt.pos.x >> ignore >> gt.pos.y;
-		i_gt = gs->c_grid_transforms.size();
-		gs->c_grid_transforms.push_back(gt);
-	}
-	
-	cRenderable r;
-	int32_t i_r = -1;
-	if (esc->renderable) {
-		r = { { (float)(gt.pos.x * gs->entity_scale), (float)(gt.pos.y * gs->entity_scale) }, esc->texture_handle, esc->color };
-		i_r = (int32_t)gs->c_renderables.size();
-		gs->c_renderables.push_back(r);
-	}
-	
-	cUnit u;
-	int32_t i_u = -1;
-	if (esc->unit) {
-		i_u = gs->c_units.size();
-		gs->c_units.push_back(u);
-	}
-
-	Entity e = {};
-	e.id = gs->entity_id_counter++;
-	e.is_active = esc->is_active;
-	e.name = std::string(esc->name_input);
-	e.grid_transform = i_gt;
-	e.renderable = i_r;
-	e.unit = i_u;
-
-	gs->entities.push_back(e);
 }
