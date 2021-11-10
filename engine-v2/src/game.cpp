@@ -31,6 +31,12 @@ void GameUpdate(GameState* gs) {
 	float mouse_wheel_delta = GetMouseWheelMove();
 	if (mouse_wheel_delta > 0 || mouse_wheel_delta < 0) {
 		gs->camera.zoom += mouse_wheel_delta / 10;
+		if (gs->camera.zoom < 0.3f) {
+			gs->camera.zoom = 0.3f;
+		}
+		else if (gs->camera.zoom > 2.0f) {
+			gs->camera.zoom = 2.0f;
+		}
 	}
 
 	if (IsKeyDown(KEY_PAGE_UP)) {
@@ -38,8 +44,11 @@ void GameUpdate(GameState* gs) {
 	}
 	else if (IsKeyDown(KEY_PAGE_DOWN)) {
 		gs->camera.zoom -= speed * 0.1f * dt;
-		if (gs->camera.zoom < 0.0f) {
-			gs->camera.zoom = 0.0f;
+		if (gs->camera.zoom < 0.3f) {
+			gs->camera.zoom = 0.3f;
+		}
+		else if (gs->camera.zoom > 2.0f) {
+			gs->camera.zoom = 2.0f;
 		}
 	}
 
