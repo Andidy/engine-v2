@@ -6,6 +6,8 @@
 #include "entity.h"
 #include "entity_manager.h"
 
+#include "movement.h"
+
 struct GameState {
 	// Assets / Textures
 	int entity_scale = 32;
@@ -19,7 +21,7 @@ struct GameState {
 	
 	EntityManager em;
 
-	int32_t selected_entity = 0;
+	int32_t selected_entity = -1;
 
 	// Camera and UI Information ==============================================
 	Vector2 mouse_pos = {};

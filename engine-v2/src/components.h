@@ -27,6 +27,8 @@ struct cRenderable {
 	a trading caravan, a fleet of ships, and a herd of animals.
 */
 struct cUnit {
+	int movement_points = 3;
+	int current_movement_points = movement_points;
 	bool waypoint_active = false; // is the movement waypoint active
 	std::deque<Vector2> waypoint_pos; // where the movement waypoint is
 	

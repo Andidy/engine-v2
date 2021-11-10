@@ -92,6 +92,10 @@ int main(void) {
 	label_num_entities.bounds = { anchor01.x + 10, anchor01.y + 90, 125, 25 };
 	label_num_entities.text = {};
 
+	gui::LabelContext label_unit_movement_points = {};
+	label_unit_movement_points.bounds = { anchor01.x + 10, anchor01.y + 110, 125, 25 };
+	label_unit_movement_points.text = {};
+
 	// Entity Spawner variables
 	//----------------------------------------------------------------------------------
 	Vector2 anchor_EntitySpawner = { anchor01.x + 10, 220 };
@@ -266,6 +270,13 @@ int main(void) {
 		label_num_entities.text += std::to_string(gs.em.entities.size());
 		gui::Label(label_num_entities);
 
+		label_unit_movement_points.text.clear();
+		label_unit_movement_points.text += "Current Movement Points: ";
+		if (gs.selected_entity >= 0) {
+			label_unit_movement_points.text += std::to_string(gs.em.c_units[gs.selected_entity].current_movement_points);
+		}
+		gui::Label(label_unit_movement_points);
+
 		// Entity Spawner
 		if (window_entity_spawner.is_active) {
 			gui::WindowBox(window_entity_spawner);
@@ -302,7 +313,7 @@ int main(void) {
 				ec.gt_pos = gt_pos;
 				ec.unit = checkbox_unit.checked;
 
-				gs.em.CreateEntity(ec);
+				gs.selected_entity = gs.em.CreateEntity(ec);
 			}
 
 			Vector2 texture_preview_pos = { color_picker_entity_spawner.bounds.x + color_picker_entity_spawner.bounds.width + 40, color_picker_entity_spawner.bounds.y };
