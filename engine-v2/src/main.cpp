@@ -22,8 +22,7 @@ void DrawGridLines(GameState& gs) {
 	// Draw the vertical lines
 	float min = gs.camera.target.x;
 	min = ceilf(min / spacing) * spacing;
-
-	float max = gs.camera.target.x + gs.game_width;
+	float max = gs.camera.target.x + gs.game_width / gs.camera.zoom;
 	max = ceilf(max / spacing) * spacing;
 
 	if(IsKeyPressed(KEY_B)) printf("min: %f, max: %f\n", min, max);
@@ -31,7 +30,7 @@ void DrawGridLines(GameState& gs) {
 	for (float i = min; i < max; i += spacing)
 	{
 		Vector2 begin = { i, gs.camera.target.y };
-		Vector2 end = { i, gs.camera.target.y + gs.game_height };
+		Vector2 end = { i, gs.camera.target.y + gs.game_height / gs.camera.zoom };
 		
 		DrawLineV(begin, end, LIGHTGRAY);
 	}
@@ -39,13 +38,13 @@ void DrawGridLines(GameState& gs) {
 	// Draw the horizontal lines
 	min = gs.camera.target.y;
 	min = ceilf(min / spacing) * spacing;
-	max = gs.camera.target.y + gs.game_height;
+	max = gs.camera.target.y + gs.game_height / gs.camera.zoom;
 	max = ceilf(max / spacing) * spacing;
 
 	for (float i = min; i < max; i += spacing)
 	{
 		Vector2 begin = { gs.camera.target.x, i };
-		Vector2 end = { gs.camera.target.x + gs.game_width, i };
+		Vector2 end = { gs.camera.target.x + gs.game_width / gs.camera.zoom, i };
 
 		DrawLineV(begin, end, LIGHTGRAY);
 	}
@@ -239,6 +238,8 @@ int main(void) {
 		label_mouse_pos.text += std::to_string(gs.mouse_pos.x);
 		label_mouse_pos.text += ", ";
 		label_mouse_pos.text += std::to_string(gs.mouse_pos.y);
+		label_mouse_pos.text += ", Zoom: ";
+		label_mouse_pos.text += std::to_string(gs.camera.zoom);
 		gui::Label(label_mouse_pos);
 		
 		label_world_pos.text.clear();
