@@ -24,5 +24,5 @@ struct EntityManager {
 	int32_t AddUnit(cUnit& u);
 	
 	// Entity Management
-	void CreateEntity(EntityContext& ec);
+	int CreateEntity(EntityContext& ec);
 };

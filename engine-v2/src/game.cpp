@@ -91,6 +91,36 @@ void GameUpdate(GameState* gs) {
 				gs->em.GridTransform(e).pos.y += 1;
 			}
 
+			if (e.unit >= 0) {
+				if (IsKeyPressed(KEY_R)) {
+					gs->em.Unit(e).current_movement_points = gs->em.Unit(e).movement_points;
+				}
+
+				if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+					Vector2 source = gs->em.GridTransform(e).pos;
+					Vector2 dest = gs->grid_pos;
+					int movement_points = gs->em.Unit(e).current_movement_points;
+					BuildPathContext bpc = BuildPath(source, dest, movement_points);
+					if (bpc.found_path) {
+						std::cout << "Found Path\n";
+						while (bpc.orders.size() > 0) {
+							int dir = bpc.orders.front();
+							bpc.orders.pop_front();
+							switch (dir) {
+								case 1: gs->em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
+								case 2: gs->em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
+								case 3: gs->em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
+								case 4: gs->em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
+							}
+						}
+						gs->em.Unit(e).current_movement_points = bpc.remaining_movement_points;
+					}
+					else {
+						std::cout << "Did not find path\n";
+					}
+				}
+			}
+
 			if (e.renderable >= 0) {
 				gs->em.Renderable(e).pos = gs->em.GridTransform(e).pos * gs->entity_scale;
 			}

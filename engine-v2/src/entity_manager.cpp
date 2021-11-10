@@ -36,7 +36,7 @@ int32_t EntityManager::AddUnit(cUnit& u) {
 
 // Entity Management functions
 
-void EntityManager::CreateEntity(EntityContext& ec) {
+int EntityManager::CreateEntity(EntityContext& ec) {
 	Entity e = {};
 
 	if (ec.grid_transform) {
@@ -72,4 +72,5 @@ void EntityManager::CreateEntity(EntityContext& ec) {
 	e.name = std::string(ec.name);
 
 	entities.push_back(e);
+	return entities.size() - 1;
 }
