@@ -272,7 +272,7 @@ int main(void) {
 
 		label_unit_movement_points.text.clear();
 		label_unit_movement_points.text += "Current Movement Points: ";
-		if (gs.selected_entity >= 0) {
+		if (gs.selected_entity >= 0 && gs.em.entities[gs.selected_entity].unit >= 0) {
 			label_unit_movement_points.text += std::to_string(gs.em.c_units[gs.selected_entity].current_movement_points);
 		}
 		gui::Label(label_unit_movement_points);

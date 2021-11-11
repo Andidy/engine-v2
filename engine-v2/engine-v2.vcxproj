@@ -170,6 +170,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\action.h" />
     <ClInclude Include="src\components.h" />
     <ClInclude Include="src\entity_manager.h" />
     <ClInclude Include="src\IVector2.h" />
@@ -182,6 +183,7 @@
     <ClInclude Include="src\universal.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\action.cpp" />
     <ClCompile Include="src\components.cpp" />
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\entity_manager.cpp" />
