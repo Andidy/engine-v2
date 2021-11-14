@@ -1,8 +1,32 @@
 #pragma once
 
-#include "game_state.h"
+#include "universal.h"
 
-void GameUpdate(GameState* gs);
+#include "action.h"
 
-void WriteEntityToFile(GameState* gs);
-void ReadEntityFromFile(GameState* gs, std::string filename);
+#include "components.h"
+#include "entity.h"
+#include "entity_manager.h"
+
+#include "scene.h"
+
+#include "movement.h"
+
+struct GameState {
+	// Assets / Textures ======================================================
+	int entity_scale = 32;
+	std::unordered_map<std::string, size_t> texture_handles;
+	std::vector<Texture2D> textures;
+
+	// Entities and Components ================================================
+	std::unordered_map<std::string, cGridTransform> blueprint_grid_transforms;
+	std::unordered_map<std::string, cRenderable> blueprint_renderables;
+	std::unordered_map<std::string, cUnit> blueprint_units;
+
+	// Scenes =================================================================
+	Scene* current_scene = nullptr;
+	std::unordered_map<std::string, Scene*> scenes;
+
+	GameState() = default;
+	void Update();
+};

@@ -41,13 +41,13 @@ struct IVector2 {
 	}
 
 	void operator*= (float s) {
-		x *= s;
-		y *= s;
+		x = (int32_t)((float)x * s);
+		y = (int32_t)((float)y * s);
 	}
 
 	void operator/= (float s) {
-		x /= s;
-		y /= s;
+		x = (int32_t)((float)x / s);
+		y = (int32_t)((float)y / s);
 	}
 
 	operator Vector2() const { return { (float)x, (float)y }; }

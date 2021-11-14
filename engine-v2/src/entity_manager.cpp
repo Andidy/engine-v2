@@ -17,19 +17,19 @@ cUnit& EntityManager::Unit(Entity& e) {
 // Add Component functions
 
 int32_t EntityManager::AddGridTransform(cGridTransform& gt) {
-	int32_t index = c_grid_transforms.size();
+	int32_t index = (int32_t)c_grid_transforms.size();
 	c_grid_transforms.push_back(gt);
 	return index;
 }
 
 int32_t EntityManager::AddRenderable(cRenderable& r) {
-	int32_t index = c_renderables.size();
+	int32_t index = (int32_t)c_renderables.size();
 	c_renderables.push_back(r);
 	return index;
 }
 
 int32_t EntityManager::AddUnit(cUnit& u) {
-	int32_t index = c_units.size();
+	int32_t index = (int32_t)c_units.size();
 	c_units.push_back(u);
 	return index;
 }
@@ -72,5 +72,5 @@ int EntityManager::CreateEntity(EntityContext& ec) {
 	e.name = std::string(ec.name);
 
 	entities.push_back(e);
-	return entities.size() - 1;
+	return (int)entities.size() - 1;
 }

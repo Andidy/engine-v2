@@ -21,6 +21,13 @@
 const int NUM_CONTROLLER_AXIS = 4;
 #include "raylib.h"
 
+#include "raygui.h"
+#include "raygui_helpers.h"
+
 #include "IVector2.h"
 
 #include "raylib_cpp_helpers.h"
+
+// This forward declaration allows the Scenes to have a pointer to the
+// GameState to access the assets.
+struct GameState;

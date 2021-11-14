@@ -2,9 +2,7 @@
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-#include "raygui_helpers.h"
 
-#include "game_state.h"
 #include "game.h"
 
 #include <filesystem>
@@ -16,40 +14,6 @@ static std::string gui_layout_extension = ".rgl";
 static std::string gui_style_extension = ".rgs";
 static std::string texture_extension = ".png";
 
-void DrawGridLines(GameState& gs) {
-	float spacing = gs.entity_scale;
-
-	// Draw the vertical lines
-	float min = gs.camera.target.x;
-	min = ceilf(min / spacing) * spacing;
-	float max = gs.camera.target.x + gs.game_width / gs.camera.zoom;
-	max = ceilf(max / spacing) * spacing;
-
-	if(IsKeyPressed(KEY_B)) printf("min: %f, max: %f\n", min, max);
-
-	for (float i = min; i < max; i += spacing)
-	{
-		Vector2 begin = { i, gs.camera.target.y };
-		Vector2 end = { i, gs.camera.target.y + gs.game_height / gs.camera.zoom };
-		
-		DrawLineV(begin, end, LIGHTGRAY);
-	}
-
-	// Draw the horizontal lines
-	min = gs.camera.target.y;
-	min = ceilf(min / spacing) * spacing;
-	max = gs.camera.target.y + gs.game_height / gs.camera.zoom;
-	max = ceilf(max / spacing) * spacing;
-
-	for (float i = min; i < max; i += spacing)
-	{
-		Vector2 begin = { gs.camera.target.x, i };
-		Vector2 end = { gs.camera.target.x + gs.game_width / gs.camera.zoom, i };
-
-		DrawLineV(begin, end, LIGHTGRAY);
-	}
-}
-
 void LoadTextureFromFile(GameState& gs, std::string filename) {
 	std::filesystem::path full_path = path_to_textures / std::filesystem::path(filename + texture_extension);
 	size_t index = gs.textures.size();
@@ -60,144 +24,15 @@ void LoadTextureFromFile(GameState& gs, std::string filename) {
 int main(void) {
 	InitWindow(1200, 900, "raylib [core] example - basic window");
 
-	bool test = false;
-
 	GameState gs;
 	
 	std::filesystem::path gui_style_path = path_to_gui_styles / std::filesystem::path(bluish + gui_style_extension);
 	GuiLoadStyle(gui_style_path.string().c_str());
 
-	// my_layout: controls initialization
-	//----------------------------------------------------------------------------------
-	Vector2 anchor01 = gs.origin_debug_region;
-	Vector2 anchor02 = gs.origin_debug_region2;
-
-	std::vector<gui::Element*> debug_gui_controls;
-	std::vector<gui::Element*> entity_spawner_controls;
-
-	gui::Label label_mouse_pos = {};
-	label_mouse_pos.bounds = { anchor01.x + 10, anchor01.y + 10, 125, 25 };
-	label_mouse_pos.text = {};
-	debug_gui_controls.push_back(&label_mouse_pos);
-
-	gui::Label label_world_pos = {};
-	label_world_pos.bounds = { anchor01.x + 10, anchor01.y + 30, 125, 25 };
-	label_world_pos.text = {};
-	debug_gui_controls.push_back(&label_world_pos);
-
-	gui::Label label_grid_pos = {};
-	label_grid_pos.bounds = { anchor01.x + 10, anchor01.y + 50, 125, 25 };
-	label_grid_pos.text = {};
-	debug_gui_controls.push_back(&label_grid_pos);
-
-	gui::Label label_selected_entity = {};
-	label_selected_entity.bounds = { anchor01.x + 10, anchor01.y + 70, 125, 25 };
-	label_selected_entity.text = {};
-	debug_gui_controls.push_back(&label_selected_entity);
-
-	gui::Label label_num_entities = {};
-	label_num_entities.bounds = { anchor01.x + 10, anchor01.y + 90, 125, 25 };
-	label_num_entities.text = {};
-	debug_gui_controls.push_back(&label_num_entities);
-
-	gui::Label label_unit_movement_points = {};
-	label_unit_movement_points.bounds = { anchor01.x + 10, anchor01.y + 110, 125, 25 };
-	label_unit_movement_points.text = {};
-	debug_gui_controls.push_back(&label_unit_movement_points);
-
-	// Entity Spawner variables
-	//----------------------------------------------------------------------------------
-	Vector2 anchor_EntitySpawner = { anchor01.x + 10, 220 };
-	
-	const int entity_spawner_text_size = 128;
-
-	gui::WindowBox window_entity_spawner = {};
-	window_entity_spawner.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 425 };
-	window_entity_spawner.is_active = true;
-	window_entity_spawner.text = "Entity Spawner";
-	entity_spawner_controls.push_back(&window_entity_spawner);
-
-	gui::CheckBox checkbox_renderable = {};
-	checkbox_renderable.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 90, 12, 12 };
-	checkbox_renderable.checked = false;
-	checkbox_renderable.text = "Renderable";
-	entity_spawner_controls.push_back(&checkbox_renderable);
-
-	gui::CheckBox checkbox_grid_transform = {};
-	checkbox_grid_transform.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 12, 12 };
-	checkbox_grid_transform.checked = false;
-	checkbox_grid_transform.text = "Grid Transform";
-	entity_spawner_controls.push_back(&checkbox_grid_transform);
-
-	gui::CheckBox checkbox_unit = {};
-	checkbox_unit.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 12, 12 };
-	checkbox_unit.checked = false;
-	checkbox_unit.text = "Unit";
-	entity_spawner_controls.push_back(&checkbox_unit);
-
-	gui::CheckBox checkbox_is_active = {};
-	checkbox_is_active.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 };
-	checkbox_is_active.checked = false;
-	checkbox_is_active.text = "is_active";
-	entity_spawner_controls.push_back(&checkbox_is_active);
-
-	gui::Line line_0 = {};
-	line_0.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 80, 275, 25 };
-	entity_spawner_controls.push_back(&line_0);
-
-	gui::Line line_1 = {};
-	line_1.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 290, 275, 20 };
-	entity_spawner_controls.push_back(&line_1);
-
-	gui::Line line_2 = {};
-	line_2.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 350, 275, 20 };
-	entity_spawner_controls.push_back(&line_2);
-
-	gui::Line line_3 = {};
-	line_3.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 380, 275, 20 };
-	entity_spawner_controls.push_back(&line_3);
-
-	gui::ColorPicker color_picker_entity_spawner = {};
-	color_picker_entity_spawner.bounds = { anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 135, 145, 145 };
-	color_picker_entity_spawner.color = WHITE;
-	entity_spawner_controls.push_back(&color_picker_entity_spawner);
-
-	gui::TextBox textbox_entity_name = {};
-	textbox_entity_name.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 50, 125, 25 };
-	textbox_entity_name.edit_mode = false;
-	textbox_entity_name.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
-	strcpy_s(textbox_entity_name.text, entity_spawner_text_size, "Unnamed");
-	textbox_entity_name.text_size = entity_spawner_text_size;
-	entity_spawner_controls.push_back(&textbox_entity_name);
-
-	gui::TextBox textbox_grid_pos = {};
-	textbox_grid_pos.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 320, 125, 25 };
-	textbox_grid_pos.edit_mode = false;
-	textbox_grid_pos.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
-	strcpy_s(textbox_grid_pos.text, entity_spawner_text_size, "x, y");
-	textbox_grid_pos.text_size = entity_spawner_text_size;
-	entity_spawner_controls.push_back(&textbox_grid_pos);
-
-	gui::Spinner spinner_texture_select = {};
-	spinner_texture_select.bounds = { anchor_EntitySpawner.x + 90, anchor_EntitySpawner.y + 100, 100, 25 };
-	spinner_texture_select.edit_mode = false;
-	spinner_texture_select.text = "Texture Select";
-	spinner_texture_select.value = 0;
-	spinner_texture_select.min = 0;
-	spinner_texture_select.max = gs.textures.size() - 1;
-	entity_spawner_controls.push_back(&spinner_texture_select);
-
-	gui::Button button_spawn_entity = {};
-	button_spawn_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 };
-	button_spawn_entity.text = "Spawn Entity";
-	entity_spawner_controls.push_back(&button_spawn_entity);
-
-	//----------------------------------------------------------------------------------
-
-	RenderTexture2D render_texture = LoadRenderTexture(gs.game_width, gs.game_height);
+	//-------------------------------------------------------------------------
 
 	// Load Texture Assets
-	//----------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 
 	// Load a pure magenta texture to act as the debug texture in slot 0.
 	gs.texture_handles.insert({ "Debug", 0 });
@@ -213,75 +48,48 @@ int main(void) {
 	LoadTextureFromFile(gs, tex1);
 	LoadTextureFromFile(gs, tex2);
 
-	//----------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
 
-	gs.RegisterAction(0, KEY_O, "SAVEGAME");
-	gs.RegisterAction(0, KEY_I, "LOADGAME");
-	gs.RegisterAction(0, KEY_U, "DELETESAVE");
-	gs.RegisterAction(0, KEY_EQUAL, "DEBUG");
+	BattleScene bs;
+	MenuScene ms;
+	bs.gs = &gs;
+	ms.gs = &gs;
+	bs.Init();
+	ms.Init();
 
-	gs.RegisterAction(0, KEY_W, "ENTITY_UP");
-	gs.RegisterAction(0, KEY_D, "ENTITY_RIGHT");
-	gs.RegisterAction(0, KEY_S, "ENTITY_DOWN");
-	gs.RegisterAction(0, KEY_A, "ENTITY_LEFT");
-	gs.RegisterAction(0, KEY_R, "RESET_MOVEMENT");
-
-	gs.RegisterAction(0, KEY_LEFT, "CAMERA_LEFT");
-	gs.RegisterAction(0, KEY_RIGHT, "CAMERA_RIGHT");
-	gs.RegisterAction(0, KEY_UP, "CAMERA_UP");
-	gs.RegisterAction(0, KEY_DOWN, "CAMERA_DOWN");
-	gs.RegisterAction(0, KEY_LEFT_SHIFT, "CAMERA_BOOST");
-	gs.RegisterAction(0, KEY_PAGE_UP, "CAMERA_ZOOM_IN");
-	gs.RegisterAction(0, KEY_PAGE_DOWN, "CAMERA_ZOOM_OUT");
-
-	gs.RegisterAction(1, MOUSE_BUTTON_LEFT, "ENTITY_SELECT");
-	gs.RegisterAction(1, MOUSE_BUTTON_RIGHT, "ENTITY_ACTION");
+	gs.scenes["BattleScene"] = &bs;
+	gs.scenes["MenuScene"] = &ms;
+	gs.current_scene = gs.scenes["BattleScene"];
 	
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_LEFT, "ENTITY_LEFT");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, "ENTITY_RIGHT");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_UP, "ENTITY_UP");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, "ENTITY_DOWN");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_TRIGGER_2, "RESET_MOVEMENT");
+	Scene& scene = *gs.current_scene;
 
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_LEFT, "CAMERA_LEFT");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, "CAMERA_RIGHT");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_UP, "CAMERA_UP");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_DOWN, "CAMERA_DOWN");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_TRIGGER_1, "CAMERA_BOOST");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_1, "CAMERA_ZOOM_IN");
-	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_2, "CAMERA_ZOOM_OUT");
-
-	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_LEFT");
-	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_RIGHT");
-	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_UP");
-	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_DOWN");
-
-	// ------------------------------------------------------------------------
-
+	//-------------------------------------------------------------------------
+	
 	while (!WindowShouldClose()) {
+		// Get Input From User ================================================
 		for(int key = 0; key < MAX_KEYBOARD_KEYS; key++) {
 			if (IsKeyPressed(key) || IsKeyReleased(key)) {
-				if (gs.action_map.find(key) == gs.action_map.end()) {
+				if (scene.action_map.find(key) == scene.action_map.end()) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}
 
 				ActionType at = IsKeyPressed(key) ? ActionType::START : ActionType::END;
-				Action action = Action(gs.action_map.at(key), at);
-				gs.action_queue.push(action);
+				Action action = Action(scene.action_map.at(key), at);
+				scene.action_queue.push(action);
 			}
 		}
 
 		for (int mouse_button = 0; mouse_button < MAX_MOUSE_BUTTONS; mouse_button++) {
 			if (IsMouseButtonPressed(mouse_button) || IsMouseButtonReleased(mouse_button)) {
-				if (gs.action_map.find(rl_MouseToCode(mouse_button)) == gs.action_map.end()) {
+				if (scene.action_map.find(rl_MouseToCode(mouse_button)) == scene.action_map.end()) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}
 
 				ActionType at = IsMouseButtonPressed(mouse_button) ? ActionType::START : ActionType::END;
-				Action action = Action(gs.action_map.at(rl_MouseToCode(mouse_button)), at);
-				gs.action_queue.push(action);
+				Action action = Action(scene.action_map.at(rl_MouseToCode(mouse_button)), at);
+				scene.action_queue.push(action);
 			}
 		}
 		
@@ -291,23 +99,23 @@ int main(void) {
 			
 			for (int gamepad_button = 0; gamepad_button < MAX_GAMEPAD_BUTTONS; gamepad_button++) {
 				if (IsGamepadButtonPressed(gamepad, gamepad_button) || IsGamepadButtonReleased(gamepad, gamepad_button)) {
-					if (gs.action_map.find(rl_ControllerToCode(gamepad_button)) == gs.action_map.end()) {
+					if (scene.action_map.find(rl_ControllerToCode(gamepad_button)) == scene.action_map.end()) {
 						// Didn't find the keycode in the mapping
 						continue;
 					}
 
 					ActionType at = IsGamepadButtonPressed(gamepad, gamepad_button) ? ActionType::START : ActionType::END;
-					Action action = Action(gs.action_map.at(rl_ControllerToCode(gamepad_button)), at);
-					gs.action_queue.push(action);
+					Action action = Action(scene.action_map.at(rl_ControllerToCode(gamepad_button)), at);
+					scene.action_queue.push(action);
 				}
 			}
 
 			for (int gamepad_axis = 0; gamepad_axis < NUM_CONTROLLER_AXIS; gamepad_axis++) {
-				if (gs.action_map.find(rl_ControllerAxisToCode(gamepad_axis)) == gs.action_map.end()) {
+				if (scene.action_map.find(rl_ControllerAxisToCode(gamepad_axis)) == scene.action_map.end()) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}
-					
+				
 				// there are 2 axis per joystick, right left and up down, they go from -1.0 to 1.0
 				// on the ps4 controller, up and left are negative.
 				float movement = GetGamepadAxisMovement(gamepad, gamepad_axis);
@@ -330,126 +138,11 @@ int main(void) {
 
 		// Game Update ========================================================
 
-		GameUpdate(&gs);
+		gs.current_scene->Update();
 
-		// Rendering Code =====================================================
-		
-		BeginTextureMode(render_texture);
-		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-		BeginMode2D(gs.camera);
+		// Rendering ==========================================================
 
-		DrawGridLines(gs);
-
-		DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
-
-		for (Entity& e : gs.em.entities) {
-			if (e.renderable >= 0) {
-				cRenderable& r = gs.em.Renderable(e);
-				DrawTextureEx(gs.textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
-			}
-		}
-
-		EndMode2D();
-		EndTextureMode();
-
-		BeginDrawing();
-		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-		
-		// Draw Game Region ===================================================
-		
-		DrawRectangleLines(gs.game_window.x-1, gs.game_window.y-1, gs.game_window.width+2, gs.game_window.height+2, GRAY);
-		DrawTexturePro(render_texture.texture, { 0, 0, gs.game_width, -gs.game_height }, gs.game_window, {0, 0}, 0.0f, WHITE);
-		
-		// Draw Debug Region ==================================================
-		DrawText("This is the debug window", anchor01.x + 10, anchor01.y + 200, 20, LIGHTGRAY);
-
-		DrawText("Controls:", anchor02.x, anchor02.y + 10, 20, GRAY);
-		DrawText("Press O to save the currently spawned entities", anchor02.x, anchor02.y + 30, 20, GRAY);
-		DrawText("Press I to load entities that were saved", anchor02.x, anchor02.y + 50, 20, GRAY);
-		DrawText("Press U to clear the save file", anchor02.x, anchor02.y + 70, 20, GRAY);
-		
-		DrawText("WASD to move the first blue square", anchor02.x, anchor02.y + 100, 20, GRAY);
-		DrawText("Arrow keys to move the camera", anchor02.x, anchor02.y + 120, 20, GRAY);
-		DrawText("Holding Shift makes blue square and camera move faster", anchor02.x, anchor02.y + 140, 20, GRAY);
-
-		// raygui: controls drawing
-		//----------------------------------------------------------------------------------
-		label_mouse_pos.text.clear();
-		label_mouse_pos.text += "Mouse Pos: ";
-		label_mouse_pos.text += std::to_string(gs.mouse_pos.x);
-		label_mouse_pos.text += ", ";
-		label_mouse_pos.text += std::to_string(gs.mouse_pos.y);
-		label_mouse_pos.text += ", Zoom: ";
-		label_mouse_pos.text += std::to_string(gs.camera.zoom);
-		
-		label_world_pos.text.clear();
-		label_world_pos.text += "World Pos: ";
-		label_world_pos.text += std::to_string(gs.world_pos.x);
-		label_world_pos.text += ", ";
-		label_world_pos.text += std::to_string(gs.world_pos.y);
-
-		label_grid_pos.text.clear();
-		label_grid_pos.text += "Grid Pos: ";
-		label_grid_pos.text += std::to_string(gs.grid_pos.x);
-		label_grid_pos.text += ", ";
-		label_grid_pos.text += std::to_string(gs.grid_pos.y);
-
-		label_selected_entity.text.clear();
-		label_selected_entity.text += "Selected Entity: ";
-		label_selected_entity.text += std::to_string(gs.selected_entity);
-
-		label_num_entities.text.clear();
-		label_num_entities.text += "Num Entities: ";
-		label_num_entities.text += std::to_string(gs.em.entities.size());
-
-		label_unit_movement_points.text.clear();
-		label_unit_movement_points.text += "Current Movement Points: ";
-		if (gs.selected_entity >= 0 && gs.em.entities[gs.selected_entity].unit >= 0) {
-			label_unit_movement_points.text += std::to_string(gs.em.c_units[gs.selected_entity].current_movement_points);
-		}
-
-		for (int i = 0; i < debug_gui_controls.size(); i++) {
-			debug_gui_controls[i]->Draw();
-		}
-
-		// Entity Spawner
-		if (window_entity_spawner.is_active) {
-			spinner_texture_select.max = gs.textures.size() - 1;
-			
-			for (int i = 0; i < entity_spawner_controls.size(); i++) {
-				entity_spawner_controls[i]->Draw();
-			}
-
-			if (button_spawn_entity.pressed) {
-				IVector2 gt_pos = { 0, 0 };
-				{
-					std::string text = textbox_grid_pos.text;
-					std::string ignore;
-					std::stringstream gt_input_converter(text);
-					gt_input_converter >> gt_pos.x >> ignore >> gt_pos.y;
-				}
-
-				EntityContext ec;
-				ec.is_active = checkbox_is_active.checked;
-				ec.name = textbox_entity_name.text;
-				ec.renderable = checkbox_renderable.checked;
-				ec.texture_scale = gs.entity_scale;
-				ec.texture_handle = (size_t)spinner_texture_select.value;
-				ec.tint_color = color_picker_entity_spawner.color;
-				ec.grid_transform = checkbox_grid_transform.checked;
-				ec.gt_pos = gt_pos;
-				ec.unit = checkbox_unit.checked;
-
-				gs.selected_entity = gs.em.CreateEntity(ec);
-			}
-
-			Vector2 texture_preview_pos = { color_picker_entity_spawner.bounds.x + color_picker_entity_spawner.bounds.width + 40, color_picker_entity_spawner.bounds.y };
-			DrawTextureEx(gs.textures[spinner_texture_select.value], texture_preview_pos, 0.0f, 2.0f, color_picker_entity_spawner.color);
-		}
-
-		//----------------------------------------------------------------------------------
-
-		EndDrawing();
+		gs.current_scene->Render();
 	}
 
 	CloseWindow();
