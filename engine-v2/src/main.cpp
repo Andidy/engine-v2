@@ -282,7 +282,7 @@ int main(void) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}
-					
+				
 				// there are 2 axis per joystick, right left and up down, they go from -1.0 to 1.0
 				// on the ps4 controller, up and left are negative.
 				float movement = GetGamepadAxisMovement(gamepad, gamepad_axis);
