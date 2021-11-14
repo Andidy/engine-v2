@@ -192,7 +192,119 @@ int main(void) {
 
 	//----------------------------------------------------------------------------------
 
+	gs.RegisterAction(0, KEY_O, "SAVEGAME");
+	gs.RegisterAction(0, KEY_I, "LOADGAME");
+	gs.RegisterAction(0, KEY_U, "DELETESAVE");
+	gs.RegisterAction(0, KEY_EQUAL, "DEBUG");
+
+	gs.RegisterAction(0, KEY_W, "ENTITY_UP");
+	gs.RegisterAction(0, KEY_D, "ENTITY_RIGHT");
+	gs.RegisterAction(0, KEY_S, "ENTITY_DOWN");
+	gs.RegisterAction(0, KEY_A, "ENTITY_LEFT");
+	gs.RegisterAction(0, KEY_R, "RESET_MOVEMENT");
+
+	gs.RegisterAction(0, KEY_LEFT, "CAMERA_LEFT");
+	gs.RegisterAction(0, KEY_RIGHT, "CAMERA_RIGHT");
+	gs.RegisterAction(0, KEY_UP, "CAMERA_UP");
+	gs.RegisterAction(0, KEY_DOWN, "CAMERA_DOWN");
+	gs.RegisterAction(0, KEY_LEFT_SHIFT, "CAMERA_BOOST");
+	gs.RegisterAction(0, KEY_PAGE_UP, "CAMERA_ZOOM_IN");
+	gs.RegisterAction(0, KEY_PAGE_DOWN, "CAMERA_ZOOM_OUT");
+
+	gs.RegisterAction(1, MOUSE_BUTTON_LEFT, "ENTITY_SELECT");
+	gs.RegisterAction(1, MOUSE_BUTTON_RIGHT, "ENTITY_ACTION");
+	
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_LEFT, "ENTITY_LEFT");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, "ENTITY_RIGHT");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_UP, "ENTITY_UP");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, "ENTITY_DOWN");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_TRIGGER_2, "RESET_MOVEMENT");
+
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_LEFT, "CAMERA_LEFT");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_RIGHT, "CAMERA_RIGHT");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_UP, "CAMERA_UP");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_FACE_DOWN, "CAMERA_DOWN");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_RIGHT_TRIGGER_1, "CAMERA_BOOST");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_1, "CAMERA_ZOOM_IN");
+	gs.RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_2, "CAMERA_ZOOM_OUT");
+
+	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_LEFT");
+	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_RIGHT");
+	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_UP");
+	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_DOWN");
+
 	while (!WindowShouldClose()) {
+		for(int key = 0; key < MAX_KEYBOARD_KEYS; key++) {
+			if (IsKeyPressed(key) || IsKeyReleased(key)) {
+				if (gs.action_map.find(key) == gs.action_map.end()) {
+					// Didn't find the keycode in the mapping
+					continue;
+				}
+
+				ActionType at = IsKeyPressed(key) ? ActionType::START : ActionType::END;
+				Action action = Action(gs.action_map.at(key), at);
+				gs.action_queue.push(action);
+			}
+		}
+
+		for (int mouse_button = 0; mouse_button < MAX_MOUSE_BUTTONS; mouse_button++) {
+			if (IsMouseButtonPressed(mouse_button) || IsMouseButtonReleased(mouse_button)) {
+				if (gs.action_map.find(rl_MouseToCode(mouse_button)) == gs.action_map.end()) {
+					// Didn't find the keycode in the mapping
+					continue;
+				}
+
+				ActionType at = IsMouseButtonPressed(mouse_button) ? ActionType::START : ActionType::END;
+				Action action = Action(gs.action_map.at(rl_MouseToCode(mouse_button)), at);
+				gs.action_queue.push(action);
+			}
+		}
+		
+		for (int gamepad = 0; gamepad < MAX_GAMEPADS; gamepad++) {
+			// If the controller isn't availible skip it
+			if (!IsGamepadAvailable(gamepad)) continue;
+			
+			for (int gamepad_button = 0; gamepad_button < MAX_GAMEPAD_BUTTONS; gamepad_button++) {
+				if (IsGamepadButtonPressed(gamepad, gamepad_button) || IsGamepadButtonReleased(gamepad, gamepad_button)) {
+					if (gs.action_map.find(rl_ControllerToCode(gamepad_button)) == gs.action_map.end()) {
+						// Didn't find the keycode in the mapping
+						continue;
+					}
+
+					ActionType at = IsGamepadButtonPressed(gamepad, gamepad_button) ? ActionType::START : ActionType::END;
+					Action action = Action(gs.action_map.at(rl_ControllerToCode(gamepad_button)), at);
+					gs.action_queue.push(action);
+				}
+			}
+
+			for (int gamepad_axis = 0; gamepad_axis < NUM_CONTROLLER_AXIS; gamepad_axis++) {
+				if (gs.action_map.find(rl_ControllerAxisToCode(gamepad_axis)) == gs.action_map.end()) {
+					// Didn't find the keycode in the mapping
+					continue;
+				}
+					
+				// there are 2 axis per joystick, right left and up down, they go from -1.0 to 1.0
+				// on the ps4 controller, up and left are negative.
+				float movement = GetGamepadAxisMovement(gamepad, gamepad_axis);
+					
+				// here is how to test a threshold on the joystick movement
+				if (fabsf(movement) > 0.25f) {
+					//switch (gamepad_axis) {
+					//	case GAMEPAD_AXIS_RIGHT_X:
+					//	{
+					//		if (movement > 0) {
+					//			Action(gs.action_map.at(rl_ControllerAxisToCode(gamepad_axis)), at);
+					//		}
+					//		else if (movement < 0) {
+					//		}
+					//	}
+					//}
+				}
+			}
+		}
+
+		// Game Update ========================================================
+
 		GameUpdate(&gs);
 
 		// Rendering Code =====================================================
@@ -272,7 +384,7 @@ int main(void) {
 
 		label_unit_movement_points.text.clear();
 		label_unit_movement_points.text += "Current Movement Points: ";
-		if (gs.selected_entity >= 0) {
+		if (gs.selected_entity >= 0 && gs.em.entities[gs.selected_entity].unit >= 0) {
 			label_unit_movement_points.text += std::to_string(gs.em.c_units[gs.selected_entity].current_movement_points);
 		}
 		gui::Label(label_unit_movement_points);

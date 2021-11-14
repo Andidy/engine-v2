@@ -1,32 +1,128 @@
 #include "game.h"
 
+void GameState::RegisterAction(int input_type, int keycode, std::string action_name) {
+	switch (input_type) {
+		case 0: // keyboard
+		{
+			keycode = rl_KeyboardToCode(keycode);
+		} break;
+		case 1: // mouse
+		{
+			keycode = rl_MouseToCode(keycode);
+		} break;
+		case 2: // controller
+		{
+			keycode = rl_ControllerToCode(keycode);
+		} break;
+		case 3: // controller axis
+		{
+			keycode = rl_CodeToControllerAxis(keycode);
+		} break;
+		default: __debugbreak(); // lol crashing 
+	}
+	action_map[keycode] = action_name;
+}
+
 void GameUpdate(GameState* gs) {
 	float dt = GetFrameTime();
 	const float base_speed = 50;
 	const float speed_multiplier = 10;
 
+	// scene
+	{
+		while (!gs->action_queue.empty()) {
+			auto & action = gs->action_queue.front();
+			
+			// Debugging Actions
+			if (action.action == "DEBUG") {
+				gs->debug = action.type == ActionType::START;
+			}
+
+			// IO
+			if (action.action == "SAVEGAME") {
+				gs->save = action.type == ActionType::END;
+			}
+			if (action.action == "LOADGAME") {
+				gs->load = action.type == ActionType::END;
+			}
+			if (action.action == "DELETESAVE") {
+				gs->clear_save = action.type == ActionType::END;
+			}
+
+			// Camera Actions
+			if (action.action == "CAMERA_UP") {
+				gs->camera_up = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_DOWN") {
+				gs->camera_down = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_LEFT") {
+				gs->camera_left = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_RIGHT") {
+				gs->camera_right = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_BOOST") {
+				gs->camera_boost = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_ZOOM_IN") {
+				gs->camera_zoom_in = action.type == ActionType::START;
+			}
+			if (action.action == "CAMERA_ZOOM_OUT") {
+				gs->camera_zoom_out = action.type == ActionType::START;
+			}
+
+			// Entity Actions
+			if (action.action == "ENTITY_UP") {
+				gs->entity_up = action.type == ActionType::END;
+			}
+			if (action.action == "ENTITY_DOWN") {
+				gs->entity_down = action.type == ActionType::END;
+			}
+			if (action.action == "ENTITY_LEFT") {
+				gs->entity_left = action.type == ActionType::END;
+			}
+			if (action.action == "ENTITY_RIGHT") {
+				gs->entity_right = action.type == ActionType::END;
+			}
+			if (action.action == "ENTITY_SELECT") {
+				gs->entity_select = action.type == ActionType::END;
+			}
+			if (action.action == "ENTITY_ACTION") {
+				gs->entity_action = action.type == ActionType::END;
+			}
+			if (action.action == "RESET_MOVEMENT") {
+				gs->reset_movement = action.type == ActionType::END;
+			}
+
+			gs->action_queue.pop();
+		}
+	}
+
 	float speed = base_speed;
-	if (IsKeyDown(KEY_LEFT_SHIFT)) {
+	if (gs->camera_boost) {
 		speed *= speed_multiplier;
 	}
 
-	if (IsKeyDown(KEY_LEFT)) {
+	if (gs->camera_left) {
 		gs->camera.target.x -= speed * 2 * dt;
 	}
-	else if (IsKeyDown(KEY_RIGHT)) {
+	else if (gs->camera_right) {
 		gs->camera.target.x += speed * 2 * dt;
 	}
-	if (IsKeyDown(KEY_UP)) {
+	if (gs->camera_up) {
 		gs->camera.target.y -= speed * 2 * dt;
 	}
-	else if (IsKeyDown(KEY_DOWN)) {
+	else if (gs->camera_down) {
 		gs->camera.target.y += speed * 2 * dt;
 	}
-	if ((!IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP) && !IsKeyDown(KEY_RIGHT) && !IsKeyDown(KEY_LEFT)) &&
-		(IsKeyReleased(KEY_DOWN) || IsKeyReleased(KEY_UP) || IsKeyReleased(KEY_RIGHT) || IsKeyReleased(KEY_LEFT))) {
+	if ((gs->camera_was_moving && !gs->camera_up && !gs->camera_down && !gs->camera_left && !gs->camera_right)) {
 		gs->camera.target.x = roundf(gs->camera.target.x);
 		gs->camera.target.y = roundf(gs->camera.target.y);
 	}
+	
+	gs->camera_was_moving = gs->camera_up || gs->camera_down || gs->camera_left || gs->camera_right;
+
 
 	float mouse_wheel_delta = GetMouseWheelMove();
 	if (mouse_wheel_delta > 0 || mouse_wheel_delta < 0) {
@@ -39,10 +135,10 @@ void GameUpdate(GameState* gs) {
 		}
 	}
 
-	if (IsKeyDown(KEY_PAGE_UP)) {
+	if (gs->camera_zoom_in) {
 		gs->camera.zoom += speed * 0.1f * dt;
 	}
-	else if (IsKeyDown(KEY_PAGE_DOWN)) {
+	else if (gs->camera_zoom_out) {
 		gs->camera.zoom -= speed * 0.1f * dt;
 		if (gs->camera.zoom < 0.3f) {
 			gs->camera.zoom = 0.3f;
@@ -66,7 +162,7 @@ void GameUpdate(GameState* gs) {
 	gs->grid_pos.y = (int)floorf(gs->world_pos.y / (float)gs->entity_scale);
 	
 	if (gs->em.entities.size() >= 1) {
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		if (gs->entity_select) {
 			for (int i = 0; i < gs->em.entities.size(); i++) {
 				if (gs->em.entities[i].grid_transform >= 0) {
 					if (gs->grid_pos == gs->em.c_grid_transforms[gs->em.entities[i].grid_transform].pos) {
@@ -74,29 +170,35 @@ void GameUpdate(GameState* gs) {
 					}
 				}
 			}
+			gs->entity_select = false;
 		}
 
 		Entity& e = gs->em.entities[gs->selected_entity];
 		if (e.grid_transform >= 0) {
-			if (IsKeyPressed(KEY_A)) {
+			if (gs->entity_left) {
 				gs->em.GridTransform(e).pos.x -= 1;
+				gs->entity_left = false;
 			}
-			if (IsKeyPressed(KEY_D)) {
+			if (gs->entity_right) {
 				gs->em.GridTransform(e).pos.x += 1;
+				gs->entity_right = false;
 			}
-			if (IsKeyPressed(KEY_W)) {
+			if (gs->entity_up) {
 				gs->em.GridTransform(e).pos.y -= 1;
+				gs->entity_up = false;
 			}
-			if (IsKeyPressed(KEY_S)) {
+			if (gs->entity_down) {
 				gs->em.GridTransform(e).pos.y += 1;
+				gs->entity_down = false;
 			}
 
 			if (e.unit >= 0) {
-				if (IsKeyPressed(KEY_R)) {
+				if (gs->reset_movement) {
 					gs->em.Unit(e).current_movement_points = gs->em.Unit(e).movement_points;
+					gs->reset_movement = false;
 				}
 
-				if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+				if (gs->entity_action) {
 					Vector2 source = gs->em.GridTransform(e).pos;
 					Vector2 dest = gs->grid_pos;
 					int movement_points = gs->em.Unit(e).current_movement_points;
@@ -118,6 +220,8 @@ void GameUpdate(GameState* gs) {
 					else {
 						std::cout << "Did not find path\n";
 					}
+
+					gs->entity_action = false;
 				}
 			}
 
@@ -127,19 +231,22 @@ void GameUpdate(GameState* gs) {
 		}
 	}
 
-	if (IsKeyPressed(KEY_O)) {
+	if (gs->save) {
 		WriteEntityToFile(gs);
+		gs->save = false;
 	}
-	else if (IsKeyPressed(KEY_I)) {
+	else if (gs->load) {
 		ReadEntityFromFile(gs, "entity.txt");
-		std::cout << "Done\n";
+		gs->load = false;
 	}
-	if (IsKeyPressed(KEY_U)) {
+	if (gs->clear_save) {
 		remove("entity.txt");
+		gs->clear_save = false;
 	}
 
 	// Debug
-	if (IsKeyPressed(KEY_EQUAL)) {
+	if (gs->debug) {
+		gs->debug = false;
 		__debugbreak();
 	}
 }
