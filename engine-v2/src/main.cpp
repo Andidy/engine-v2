@@ -72,29 +72,38 @@ int main(void) {
 	Vector2 anchor01 = gs.origin_debug_region;
 	Vector2 anchor02 = gs.origin_debug_region2;
 
-	gui::LabelContext label_mouse_pos = {};
+	std::vector<gui::Element*> debug_gui_controls;
+	std::vector<gui::Element*> entity_spawner_controls;
+
+	gui::Label label_mouse_pos = {};
 	label_mouse_pos.bounds = { anchor01.x + 10, anchor01.y + 10, 125, 25 };
 	label_mouse_pos.text = {};
+	debug_gui_controls.push_back(&label_mouse_pos);
 
-	gui::LabelContext label_world_pos = {};
+	gui::Label label_world_pos = {};
 	label_world_pos.bounds = { anchor01.x + 10, anchor01.y + 30, 125, 25 };
 	label_world_pos.text = {};
+	debug_gui_controls.push_back(&label_world_pos);
 
-	gui::LabelContext label_grid_pos = {};
+	gui::Label label_grid_pos = {};
 	label_grid_pos.bounds = { anchor01.x + 10, anchor01.y + 50, 125, 25 };
 	label_grid_pos.text = {};
+	debug_gui_controls.push_back(&label_grid_pos);
 
-	gui::LabelContext label_selected_entity = {};
+	gui::Label label_selected_entity = {};
 	label_selected_entity.bounds = { anchor01.x + 10, anchor01.y + 70, 125, 25 };
 	label_selected_entity.text = {};
+	debug_gui_controls.push_back(&label_selected_entity);
 
-	gui::LabelContext label_num_entities = {};
+	gui::Label label_num_entities = {};
 	label_num_entities.bounds = { anchor01.x + 10, anchor01.y + 90, 125, 25 };
 	label_num_entities.text = {};
+	debug_gui_controls.push_back(&label_num_entities);
 
-	gui::LabelContext label_unit_movement_points = {};
+	gui::Label label_unit_movement_points = {};
 	label_unit_movement_points.bounds = { anchor01.x + 10, anchor01.y + 110, 125, 25 };
 	label_unit_movement_points.text = {};
+	debug_gui_controls.push_back(&label_unit_movement_points);
 
 	// Entity Spawner variables
 	//----------------------------------------------------------------------------------
@@ -102,72 +111,86 @@ int main(void) {
 	
 	const int entity_spawner_text_size = 128;
 
-	gui::WindowBoxContext window_entity_spawner = {};
+	gui::WindowBox window_entity_spawner = {};
 	window_entity_spawner.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 0, 275, 425 };
 	window_entity_spawner.is_active = true;
 	window_entity_spawner.text = "Entity Spawner";
+	entity_spawner_controls.push_back(&window_entity_spawner);
 
-	gui::CheckBoxContext checkbox_renderable = {};
+	gui::CheckBox checkbox_renderable = {};
 	checkbox_renderable.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 90, 12, 12 };
 	checkbox_renderable.checked = false;
 	checkbox_renderable.text = "Renderable";
+	entity_spawner_controls.push_back(&checkbox_renderable);
 
-	gui::CheckBoxContext checkbox_grid_transform = {};
+	gui::CheckBox checkbox_grid_transform = {};
 	checkbox_grid_transform.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 300, 12, 12 };
 	checkbox_grid_transform.checked = false;
 	checkbox_grid_transform.text = "Grid Transform";
+	entity_spawner_controls.push_back(&checkbox_grid_transform);
 
-	gui::CheckBoxContext checkbox_unit = {};
+	gui::CheckBox checkbox_unit = {};
 	checkbox_unit.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 360, 12, 12 };
 	checkbox_unit.checked = false;
 	checkbox_unit.text = "Unit";
+	entity_spawner_controls.push_back(&checkbox_unit);
 
-	gui::CheckBoxContext checkbox_is_active = {};
+	gui::CheckBox checkbox_is_active = {};
 	checkbox_is_active.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 30, 12, 12 };
 	checkbox_is_active.checked = false;
 	checkbox_is_active.text = "is_active";
+	entity_spawner_controls.push_back(&checkbox_is_active);
 
-	gui::LineContext line_0 = {};
+	gui::Line line_0 = {};
 	line_0.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 80, 275, 25 };
+	entity_spawner_controls.push_back(&line_0);
 
-	gui::LineContext line_1 = {};
+	gui::Line line_1 = {};
 	line_1.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 290, 275, 20 };
+	entity_spawner_controls.push_back(&line_1);
 
-	gui::LineContext line_2 = {};
+	gui::Line line_2 = {};
 	line_2.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 350, 275, 20 };
+	entity_spawner_controls.push_back(&line_2);
 
-	gui::LineContext line_3 = {};
+	gui::Line line_3 = {};
 	line_3.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 380, 275, 20 };
+	entity_spawner_controls.push_back(&line_3);
 
-	gui::ColorPickerContext color_picker_entity_spawner = {};
+	gui::ColorPicker color_picker_entity_spawner = {};
 	color_picker_entity_spawner.bounds = { anchor_EntitySpawner.x + 15, anchor_EntitySpawner.y + 135, 145, 145 };
 	color_picker_entity_spawner.color = WHITE;
+	entity_spawner_controls.push_back(&color_picker_entity_spawner);
 
-	gui::TextBoxContext textbox_entity_name = {};
+	gui::TextBox textbox_entity_name = {};
 	textbox_entity_name.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 50, 125, 25 };
 	textbox_entity_name.edit_mode = false;
 	textbox_entity_name.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
 	strcpy_s(textbox_entity_name.text, entity_spawner_text_size, "Unnamed");
 	textbox_entity_name.text_size = entity_spawner_text_size;
+	entity_spawner_controls.push_back(&textbox_entity_name);
 
-	gui::TextBoxContext textbox_grid_pos = {};
+	gui::TextBox textbox_grid_pos = {};
 	textbox_grid_pos.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 320, 125, 25 };
 	textbox_grid_pos.edit_mode = false;
 	textbox_grid_pos.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
 	strcpy_s(textbox_grid_pos.text, entity_spawner_text_size, "x, y");
 	textbox_grid_pos.text_size = entity_spawner_text_size;
+	entity_spawner_controls.push_back(&textbox_grid_pos);
 
-	gui::SpinnerContext spinner_texture_select = {};
+	gui::Spinner spinner_texture_select = {};
 	spinner_texture_select.bounds = { anchor_EntitySpawner.x + 90, anchor_EntitySpawner.y + 100, 100, 25 };
 	spinner_texture_select.edit_mode = false;
 	spinner_texture_select.text = "Texture Select";
 	spinner_texture_select.value = 0;
 	spinner_texture_select.min = 0;
 	spinner_texture_select.max = gs.textures.size() - 1;
+	entity_spawner_controls.push_back(&spinner_texture_select);
 
-	gui::ButtonContext button_spawn_entity = {};
+	gui::Button button_spawn_entity = {};
 	button_spawn_entity.bounds = { anchor_EntitySpawner.x + 5, anchor_EntitySpawner.y + 390, 125, 25 };
 	button_spawn_entity.text = "Spawn Entity";
+	entity_spawner_controls.push_back(&button_spawn_entity);
 
 	//----------------------------------------------------------------------------------
 
@@ -232,6 +255,8 @@ int main(void) {
 	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_RIGHT");
 	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_UP");
 	//gs.RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_DOWN");
+
+	// ------------------------------------------------------------------------
 
 	while (!WindowShouldClose()) {
 		for(int key = 0; key < MAX_KEYBOARD_KEYS; key++) {
@@ -356,56 +381,46 @@ int main(void) {
 		label_mouse_pos.text += std::to_string(gs.mouse_pos.y);
 		label_mouse_pos.text += ", Zoom: ";
 		label_mouse_pos.text += std::to_string(gs.camera.zoom);
-		gui::Label(label_mouse_pos);
 		
 		label_world_pos.text.clear();
 		label_world_pos.text += "World Pos: ";
 		label_world_pos.text += std::to_string(gs.world_pos.x);
 		label_world_pos.text += ", ";
 		label_world_pos.text += std::to_string(gs.world_pos.y);
-		gui::Label(label_world_pos);
 
 		label_grid_pos.text.clear();
 		label_grid_pos.text += "Grid Pos: ";
 		label_grid_pos.text += std::to_string(gs.grid_pos.x);
 		label_grid_pos.text += ", ";
 		label_grid_pos.text += std::to_string(gs.grid_pos.y);
-		gui::Label(label_grid_pos);
 
 		label_selected_entity.text.clear();
 		label_selected_entity.text += "Selected Entity: ";
 		label_selected_entity.text += std::to_string(gs.selected_entity);
-		gui::Label(label_selected_entity);
 
 		label_num_entities.text.clear();
 		label_num_entities.text += "Num Entities: ";
 		label_num_entities.text += std::to_string(gs.em.entities.size());
-		gui::Label(label_num_entities);
 
 		label_unit_movement_points.text.clear();
 		label_unit_movement_points.text += "Current Movement Points: ";
 		if (gs.selected_entity >= 0 && gs.em.entities[gs.selected_entity].unit >= 0) {
 			label_unit_movement_points.text += std::to_string(gs.em.c_units[gs.selected_entity].current_movement_points);
 		}
-		gui::Label(label_unit_movement_points);
+
+		for (int i = 0; i < debug_gui_controls.size(); i++) {
+			debug_gui_controls[i]->Draw();
+		}
 
 		// Entity Spawner
 		if (window_entity_spawner.is_active) {
-			gui::WindowBox(window_entity_spawner);
-			gui::CheckBox(checkbox_is_active);
-			gui::CheckBox(checkbox_renderable);
-			gui::CheckBox(checkbox_grid_transform);
-			gui::CheckBox(checkbox_unit);
-			gui::Line(line_0);
-			gui::Line(line_1);
-			gui::Line(line_2);
-			gui::Line(line_3);
-			gui::ColorPicker(color_picker_entity_spawner);
-			gui::TextBox(textbox_entity_name);
-			gui::TextBox(textbox_grid_pos);
-			gui::Spinner(spinner_texture_select, gs.textures.size() - 1);
+			spinner_texture_select.max = gs.textures.size() - 1;
 			
-			if (gui::Button(button_spawn_entity)) {
+			for (int i = 0; i < entity_spawner_controls.size(); i++) {
+				entity_spawner_controls[i]->Draw();
+			}
+
+			if (button_spawn_entity.pressed) {
 				IVector2 gt_pos = { 0, 0 };
 				{
 					std::string text = textbox_grid_pos.text;

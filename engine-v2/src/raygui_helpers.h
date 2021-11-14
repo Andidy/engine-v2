@@ -7,79 +7,84 @@
 #include <string>
 
 namespace gui {
-	struct ButtonContext {
+	struct Element {
+		virtual void Draw() = 0;
+	};
+	
+	struct Button : Element {
 		Rectangle bounds;
 		std::string text;
+		bool pressed;
+
+		void Draw();
 	};
 
-	bool Button(ButtonContext& bc);
-
-	struct LineContext {
+	struct Line : Element {
 		Rectangle bounds;
 		std::string text;
+
+		void Draw();
 	};
 
-	void Line(LineContext& lc);
-
-	struct CheckBoxContext {
+	struct CheckBox : Element {
 		Rectangle bounds;
 		std::string text;
 		bool checked;
+
+		void Draw();
 	};
 
-	bool CheckBox(CheckBoxContext& cbc);
-
-	struct TextBoxContext {
+	struct TextBox : Element {
 		Rectangle bounds;
 		size_t text_size;
 		char* text;
 		bool edit_mode;
+
+		void Draw();
 	};
 
-	void TextBox(TextBoxContext& tbc);
-
-	struct ColorPickerContext {
+	struct ColorPicker : Element {
 		Rectangle bounds;
 		Color color;
+
+		void Draw();
 	};
 
-	Color ColorPicker(ColorPickerContext& cpc);
-
-	struct SpinnerContext {
+	struct Spinner : Element {
 		Rectangle bounds;
 		std::string text;
 		bool edit_mode;
 		int value;
 		int min;
 		int max;
+
+		void Draw();
+		void Draw(int max);
 	};
 
-	void Spinner(SpinnerContext& sc);
-	void Spinner(SpinnerContext& sc, int max);
-
-	struct WindowBoxContext {
+	struct WindowBox : Element {
 		Rectangle bounds;
 		std::string text;
 		bool is_active;
+
+		void Draw();
 	};
 
-	void WindowBox(WindowBoxContext& wbc);
-
-	struct LabelContext {
+	struct Label : Element {
 		Rectangle bounds;
 		std::string text;
+
+		void Draw();
 	};
 
-	void Label(LabelContext& lc);
-
-	struct ValueBoxContext {
+	struct ValueBox : Element {
 		Rectangle bounds;
 		std::string text;
 		bool edit_mode;
 		int value;
 		int min;
 		int max;
-	};
 
-	void ValueBox(ValueBoxContext& vbc);
+		void Draw();
+	};
 };
