@@ -1,54 +1,52 @@
 #include "raygui_helpers.h"
 
 namespace gui {
-	bool Button(ButtonContext& bc) {
-		return GuiButton(bc.bounds, bc.text.c_str());
+	void Button::Draw() {
+		pressed = GuiButton(bounds, text.c_str());
 	}
 	
-	void Line(LineContext& lc) {
-		GuiLine(lc.bounds, lc.text.c_str());
+	void Line::Draw() {
+		GuiLine(bounds, text.c_str());
 	}
 
-	bool CheckBox(CheckBoxContext& cbc) {
-		cbc.checked = GuiCheckBox(cbc.bounds, cbc.text.c_str(), cbc.checked);
-		return cbc.checked;
+	void CheckBox::Draw() {
+		checked = GuiCheckBox(bounds, text.c_str(), checked);
 	}
 
-	void TextBox(TextBoxContext& tbc) {
-		if (GuiTextBox(tbc.bounds, tbc.text, tbc.text_size, tbc.edit_mode)) {
-			tbc.edit_mode = !tbc.edit_mode;
+	void TextBox::Draw() {
+		if (GuiTextBox(bounds, text, text_size, edit_mode)) {
+			edit_mode = !edit_mode;
 		}
 	}
 
-	Color ColorPicker(ColorPickerContext& cpc) {
-		cpc.color = GuiColorPicker(cpc.bounds, cpc.color);
-		return cpc.color;
+	void ColorPicker::Draw() {
+		color = GuiColorPicker(bounds, color);
 	}
 
-	void Spinner(SpinnerContext& sc) {
-		if (GuiSpinner(sc.bounds, sc.text.c_str(), &sc.value, sc.min, sc.max, sc.edit_mode)) {
-			sc.edit_mode = !sc.edit_mode;
+	void Spinner::Draw() {
+		if (GuiSpinner(bounds, text.c_str(), &value, min, max, edit_mode)) {
+			edit_mode = !edit_mode;
 		}
 	}
 
-	void Spinner(SpinnerContext& sc, int max) {
-		sc.max = max;
-		if (GuiSpinner(sc.bounds, sc.text.c_str(), &sc.value, sc.min, sc.max, sc.edit_mode)) {
-			sc.edit_mode = !sc.edit_mode;
+	void Spinner::Draw(int max) {
+		max = max;
+		if (GuiSpinner(bounds, text.c_str(), &value, min, max, edit_mode)) {
+			edit_mode = !edit_mode;
 		}
 	}
 
-	void WindowBox(WindowBoxContext& wbc) {
-		wbc.is_active = !GuiWindowBox(wbc.bounds, wbc.text.c_str());
+	void WindowBox::Draw() {
+		is_active = !GuiWindowBox(bounds, text.c_str());
 	}
 
-	void Label(LabelContext& lc) {
-		GuiLabel(lc.bounds, lc.text.c_str());
+	void Label::Draw() {
+		GuiLabel(bounds, text.c_str());
 	}
 
-	void ValueBox(ValueBoxContext& vbc) {
-		if (GuiValueBox(vbc.bounds, vbc.text.c_str(), &vbc.value, vbc.min, vbc.max, vbc.edit_mode)) {
-			vbc.edit_mode = !vbc.edit_mode;
+	void ValueBox::Draw() {
+		if (GuiValueBox(bounds, text.c_str(), &value, min, max, edit_mode)) {
+			edit_mode = !edit_mode;
 		}
 	}
 }
