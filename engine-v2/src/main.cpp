@@ -44,9 +44,29 @@ int main(void) {
 	std::string tex0 = "grass";
 	std::string tex1 = "tree";
 	std::string tex2 = "water";
+	std::string tex3 = "sword";
 	LoadTextureFromFile(gs, tex0);
 	LoadTextureFromFile(gs, tex1);
 	LoadTextureFromFile(gs, tex2);
+	LoadTextureFromFile(gs, tex3);
+
+	std::string tex4 = "bitkenney/arrow_shaft";
+	std::string tex5 = "bitkenney/arrow_head";
+	std::string tex6 = "bitkenney/arrow_butt";
+	std::string tex7 = "bitkenney/arrow_bend";
+	std::string tex8 = "bitkenney/cursor_tile";
+	LoadTextureFromFile(gs, tex4);
+	LoadTextureFromFile(gs, tex5);
+	LoadTextureFromFile(gs, tex6);
+	LoadTextureFromFile(gs, tex7);
+	LoadTextureFromFile(gs, tex8);
+
+	// Load a blue texture to act as the movement range indicator.
+	{
+		int index = gs.textures.size();
+		gs.texture_handles.insert({ "Movement", index });
+		gs.textures.push_back(LoadTextureFromImage(GenImageColor(gs.entity_scale, gs.entity_scale, SKYBLUE)));
+	}
 
 	//-------------------------------------------------------------------------
 
