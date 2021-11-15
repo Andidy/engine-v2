@@ -334,6 +334,7 @@ void BattleScene::Update() {
 	grid_pos.y = (int)floorf(world_pos.y / (float)gs->entity_scale);
 
 	if (em.entities.size() >= 1) {
+		// Select an entity
 		if (entity_select) {
 			for (int i = 0; i < em.entities.size(); i++) {
 				if (em.entities[i].grid_transform >= 0) {
@@ -365,11 +366,13 @@ void BattleScene::Update() {
 			}
 
 			if (e.unit >= 0) {
+				// Reset movement points of the current unit
 				if (reset_movement) {
 					em.Unit(e).current_movement_points = em.Unit(e).movement_points;
 					reset_movement = false;
 				}
 
+				// Move the unit
 				if (entity_action) {
 					Vector2 source = em.GridTransform(e).pos;
 					Vector2 dest = grid_pos;
@@ -397,6 +400,7 @@ void BattleScene::Update() {
 				}
 			}
 
+			// Setup rendering information
 			if (e.renderable >= 0) {
 				em.Renderable(e).pos = em.GridTransform(e).pos * gs->entity_scale;
 			}
@@ -435,6 +439,275 @@ void BattleScene::Render() {
 	DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
 	for (Entity& e : em.entities) {
+		if (e.unit >= 0 && e.renderable >= 0) {
+			cUnit& c = em.Unit(e);
+			cRenderable& r = em.Renderable(e);
+
+			Color temp_r = r.tint_color;
+			temp_r.a = 128; // set transparency to half
+
+			int movement_color = gs->texture_handles["Movement"];
+
+			// 1 movement
+			Vector2 vl = r.pos;
+			Vector2 vr = r.pos;
+			Vector2 vu = r.pos;
+			Vector2 vd = r.pos;
+			vl.x -= 1 * gs->entity_scale;
+			vr.x += 1 * gs->entity_scale;
+			vu.y -= 1 * gs->entity_scale;
+			vd.y += 1 * gs->entity_scale;
+
+			// 2 movement
+			Vector2 vl2 = r.pos;
+			Vector2 vr2 = r.pos;
+			Vector2 vu2 = r.pos;
+			Vector2 vd2 = r.pos;
+			vl2.x -= 2 * gs->entity_scale;
+			vr2.x += 2 * gs->entity_scale;
+			vu2.y -= 2 * gs->entity_scale;
+			vd2.y += 2 * gs->entity_scale;
+			Vector2 diag0 = r.pos;
+			Vector2 diag1 = r.pos;
+			Vector2 diag2 = r.pos;
+			Vector2 diag3 = r.pos;
+			diag0.x -= 1 * gs->entity_scale;
+			diag0.y -= 1 * gs->entity_scale;
+			diag1.x -= 1 * gs->entity_scale;
+			diag1.y += 1 * gs->entity_scale;
+			diag2.x += 1 * gs->entity_scale;
+			diag2.y -= 1 * gs->entity_scale;
+			diag3.x += 1 * gs->entity_scale;
+			diag3.y += 1 * gs->entity_scale;
+
+			// 3 movement
+			Vector2 vl3 = r.pos;
+			Vector2 vr3 = r.pos;
+			Vector2 vu3 = r.pos;
+			Vector2 vd3 = r.pos;
+			vl3.x -= 3 * gs->entity_scale;
+			vr3.x += 3 * gs->entity_scale;
+			vu3.y -= 3 * gs->entity_scale;
+			vd3.y += 3 * gs->entity_scale;
+			Vector2 diag4 = r.pos;
+			Vector2 diag5 = r.pos;
+			Vector2 diag6 = r.pos;
+			Vector2 diag7 = r.pos;
+			Vector2 diag8 = r.pos;
+			Vector2 diag9 = r.pos;
+			Vector2 diag10 = r.pos;
+			Vector2 diag11 = r.pos;
+			diag4.x -= 2 * gs->entity_scale;
+			diag4.y -= 1 * gs->entity_scale;
+			diag5.x -= 2 * gs->entity_scale;
+			diag5.y += 1 * gs->entity_scale;
+			diag6.x += 2 * gs->entity_scale;
+			diag6.y -= 1 * gs->entity_scale;
+			diag7.x += 2 * gs->entity_scale;
+			diag7.y += 1 * gs->entity_scale;
+			diag8.x -= 1 * gs->entity_scale;
+			diag8.y -= 2 * gs->entity_scale;
+			diag9.x -= 1 * gs->entity_scale;
+			diag9.y += 2 * gs->entity_scale;
+			diag10.x += 1 * gs->entity_scale;
+			diag10.y -= 2 * gs->entity_scale;
+			diag11.x += 1 * gs->entity_scale;
+			diag11.y += 2 * gs->entity_scale;
+
+			switch (c.current_movement_points) {
+				case 3:
+				{
+					// Draw 3 movement
+					DrawTextureEx(gs->textures[movement_color], diag11, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag10, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag9, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag8, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag7, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag6, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag5, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag4, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vl3, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vr3, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vu3, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vd3, 0.0f, 1.0f, temp_r);
+					[[fallthrough]];
+				}
+				case 2:
+				{
+					// Draw 2 movement
+					DrawTextureEx(gs->textures[movement_color], diag3, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag2, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag1, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], diag0, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vl2, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vr2, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vu2, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vd2, 0.0f, 1.0f, temp_r);
+					[[fallthrough]];
+				}
+				case 1:
+				{
+					// Draw 1 movement
+					DrawTextureEx(gs->textures[movement_color], vl, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vr, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vu, 0.0f, 1.0f, temp_r);
+					DrawTextureEx(gs->textures[movement_color], vd, 0.0f, 1.0f, temp_r);
+				} break;
+				case 0: break;
+				default: __debugbreak(); // something is wrong
+			}
+
+			// Show path to mouse cursor
+			if (grid_pos != em.GridTransform(e).pos) {
+				Vector2 source = em.GridTransform(e).pos;
+				Vector2 dest = grid_pos;
+				int movement_points = em.Unit(e).current_movement_points;
+
+				// Build path from unit to cursor
+				BuildPathContext bpc = BuildPath(source, dest, movement_points);
+				if (bpc.found_path) {
+					// Get texture handles for drawing the path
+					int arrow_butt = gs->texture_handles["arrow_butt"];
+					int arrow_head = gs->texture_handles["arrow_head"];
+					int arrow_shaft = gs->texture_handles["arrow_shaft"];
+					int arrow_bend = gs->texture_handles["arrow_bend"];
+					int cursor_tile = gs->texture_handles["cursor_tile"];
+					
+					// Draw the path arrow
+					Vector2 ghost = em.GridTransform(e).pos;
+
+					// Parameters for the drawing
+					Rectangle src = { 0, 0, 16, 16 };
+					Vector2 origin = { src.width, src.height };
+					Vector2 pos = ghost * gs->entity_scale;
+					Rectangle dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
+
+					// Draw the arrow butt underneath the unit
+					switch (bpc.orders.front()) {
+						case 1: {
+							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 0.0f, WHITE);
+							ghost.y -= 1.0f;
+						} break;
+						case 2: {
+							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 180.0f, WHITE);
+							ghost.y += 1.0f;
+						} break;
+						case 3: {
+							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 270.0f, WHITE);
+							ghost.x -= 1.0f;
+						} break;
+						case 4: {
+							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 90.0f, WHITE);
+							ghost.x += 1.0f;
+						} break;
+					}
+
+					// Draw the first segment that connects to the butt
+					for (int i = 1; i < bpc.orders.size(); i++) {
+						pos = ghost * gs->entity_scale;
+						dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
+
+						// continuing in the same direction, use arrow_shaft
+						if (bpc.orders[i] == bpc.orders[i - 1]) {
+							switch (bpc.orders[i]) {
+								case 1:
+								{
+									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 0.0f, WHITE);
+									ghost.y -= 1.0f;
+								} break;
+								case 2:
+								{
+									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 180.0f, WHITE);
+									ghost.y += 1.0f;
+								} break;
+								case 3:
+								{
+									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 270.0f, WHITE);
+									ghost.x -= 1.0f;
+								} break;
+								case 4:
+								{
+									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 90.0f, WHITE);
+									ghost.x += 1.0f;
+								} break;
+							}
+						}
+						// changing the direction, use arrow_bend
+						if (bpc.orders[i] != bpc.orders[i - 1]) {
+							switch (bpc.orders[i]) {
+								case 1:
+								{
+									if (bpc.orders[i - 1] == 3) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
+										ghost.y -= 1.0f;
+									}
+									else if (bpc.orders[i - 1] == 4) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
+										ghost.y -= 1.0f;
+									}
+								} break;
+								case 2:
+								{
+									if (bpc.orders[i - 1] == 3) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
+										ghost.y += 1.0f;
+									}
+									else if (bpc.orders[i - 1] == 4) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
+										ghost.y += 1.0f;
+									}
+								} break;
+								case 3:
+								{
+									if (bpc.orders[i - 1] == 1) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
+										ghost.x -= 1.0f;
+									}
+									else if (bpc.orders[i - 1] == 2) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
+										ghost.x -= 1.0f;
+									}
+								} break;
+								case 4:
+								{
+									if (bpc.orders[i - 1] == 1) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
+										ghost.x += 1.0f;
+									} 
+									else if (bpc.orders[i - 1] == 2) {
+										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
+										ghost.x += 1.0f;
+									}
+								} break;
+							}
+						}
+					}
+
+					// Draw the arrow head where the cursor is
+					pos = ghost * gs->entity_scale;
+					dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
+					switch (bpc.orders.back()) {
+						case 1:
+						{
+							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 0.0f, WHITE);
+						} break;
+						case 2:
+						{
+							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 180.0f, WHITE);
+						} break;
+						case 3:
+						{
+							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 270.0f, WHITE);
+						} break;
+						case 4:
+						{
+							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 90.0f, WHITE);
+						} break;
+					}
+				}
+			}
+		}
+		
 		if (e.renderable >= 0) {
 			cRenderable& r = em.Renderable(e);
 			DrawTextureEx(gs->textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
