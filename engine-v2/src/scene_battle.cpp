@@ -835,6 +835,9 @@ void BattleScene::WriteEntityToFile() {
 		if (e.unit != -1) {
 			file << "\t" << em.Unit(e).ToString() << "\n";
 		}
+		if (e.health != -1) {
+			file << "\t" << em.Health(e).ToString() << "\n";
+		}
 		file << "];\n";
 	}
 
@@ -934,6 +937,19 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 						file >> ignore_string >> ignore_string;
 
 						e->unit = em.AddUnit(u);
+					}
+					else if (file_contents == "health") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+						
+						// need to load the health component
+						cHealth h;
+						file >> h.current >> ignore_string >> h.max;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->health = em.AddHealth(h);
 					}
 				}
 				else if (file_contents == "];") {

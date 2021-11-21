@@ -34,3 +34,13 @@ struct cUnit {
 	
 	std::string ToString();
 };
+
+/*
+	Health allows an entity to take damage and die / be destroyed.
+*/
+struct cHealth {
+	int max;
+	int current;
+
+	std::string ToString();
+};

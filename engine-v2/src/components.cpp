@@ -52,3 +52,15 @@ std::string cUnit::ToString() {
 	result += " ] ;";
 	return result;
 }
+
+// cHealth =============================================================
+
+std::string cHealth::ToString() {
+	std::string result = "";
+	result += "component health = [ ";
+	result += std::to_string(current);
+	result += ", ";
+	result += std::to_string(max);
+	result += " ] ;";
+	return result;
+}
