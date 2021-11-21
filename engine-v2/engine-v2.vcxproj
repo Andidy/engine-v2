@@ -180,6 +180,8 @@
     <ClInclude Include="src\raygui_helpers.h" />
     <ClInclude Include="src\raylib_cpp_helpers.h" />
     <ClInclude Include="src\scene.h" />
+    <ClInclude Include="src\scene_battle.h" />
+    <ClInclude Include="src\scene_mainmenu.h" />
     <ClInclude Include="src\universal.h" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +195,8 @@
     <ClCompile Include="src\raygui_helpers.cpp" />
     <ClCompile Include="src\raylib_cpp_helpers.cpp" />
     <ClCompile Include="src\scene.cpp" />
+    <ClCompile Include="src\scene_battle.cpp" />
+    <ClCompile Include="src\scene_mainmenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\raysan5\raylib.vcxproj">
