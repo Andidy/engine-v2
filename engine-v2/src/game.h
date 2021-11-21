@@ -9,6 +9,8 @@
 #include "entity_manager.h"
 
 #include "scene.h"
+#include "scene_battle.h"
+#include "scene_mainmenu.h"
 
 #include "movement.h"
 
