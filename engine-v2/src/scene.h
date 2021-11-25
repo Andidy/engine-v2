@@ -10,7 +10,8 @@ struct Scene {
 	bool paused = false;
 	
 	// Actions
-	std::unordered_map<int, std::string> action_map;
+	std::unordered_map<size_t, std::string> action_name_map;
+	std::unordered_map<int, size_t> action_map;
 	std::queue<Action> action_queue;
 	void RegisterAction(int input_type, int keycode, std::string action_name);
 

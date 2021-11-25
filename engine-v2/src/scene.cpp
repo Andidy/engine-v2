@@ -23,5 +23,8 @@ void Scene::RegisterAction(int input_type, int keycode, std::string action_name)
 		} break;
 		default: __debugbreak(); // lol crashing 
 	}
-	action_map[keycode] = action_name;
+
+	size_t hash = str_hash(action_name);
+	action_map[keycode] = hash;
+	action_name_map[hash] = action_name;
 }
