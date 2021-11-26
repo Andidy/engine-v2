@@ -44,3 +44,13 @@ struct cHealth {
 
 	std::string ToString();
 };
+
+/*
+	Attack allows an entity to deal damage to things.
+*/
+struct cAttack {
+	int damage;
+	int range;
+
+	std::string ToString();
+};

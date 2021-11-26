@@ -44,6 +44,12 @@ int EntityManager::AddHealth(cHealth& h) {
 	return index;
 }
 
+int EntityManager::AddAttack(cAttack& a) {
+	int index = (int)c_attack.size();
+	c_attack.push_back(a);
+	return index;
+}
+
 // Entity Management functions
 
 int EntityManager::CreateEntity(EntityContext& ec) {
@@ -74,6 +80,13 @@ int EntityManager::CreateEntity(EntityContext& ec) {
 		h.max = ec.health_max;
 		h.current = h.max;
 		e.health = AddHealth(h);
+	}
+
+	if (ec.attack) {
+		cAttack a;
+		a.damage = ec.attack_damage;
+		a.range = ec.attack_range;
+		e.attack = AddAttack(a);
 	}
 
 	// If the id is known and in the context use it

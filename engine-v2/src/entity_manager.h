@@ -13,6 +13,7 @@ struct EntityManager {
 	std::vector<cRenderable> c_renderables;
 	std::vector<cUnit> c_units;
 	std::vector<cHealth> c_health;
+	std::vector<cAttack> c_attack;
 
 	// Component Accessors
 	cGridTransform& GridTransform(Entity& e);
@@ -25,6 +26,7 @@ struct EntityManager {
 	int AddRenderable(cRenderable& r);
 	int AddUnit(cUnit& u);
 	int AddHealth(cHealth& h);
+	int AddAttack(cAttack& a);
 	
 	// Entity Management
 	int CreateEntity(EntityContext& ec);

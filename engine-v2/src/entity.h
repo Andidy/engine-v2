@@ -21,6 +21,10 @@ struct EntityContext {
 
 	bool health = false;
 	int health_max = 0;
+
+	bool attack = false;
+	int attack_damage = 0;
+	int attack_range = 0;
 };
 
 struct Entity {
@@ -32,6 +36,7 @@ struct Entity {
 	int renderable = -1;
 	int unit = -1;
 	int health = -1;
+	int attack = -1;
 
 	Entity() = default;
 

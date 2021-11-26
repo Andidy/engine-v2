@@ -53,7 +53,7 @@ std::string cUnit::ToString() {
 	return result;
 }
 
-// cHealth =============================================================
+// cHealth ====================================================================
 
 std::string cHealth::ToString() {
 	std::string result = "";
@@ -61,6 +61,18 @@ std::string cHealth::ToString() {
 	result += std::to_string(current);
 	result += ", ";
 	result += std::to_string(max);
+	result += " ] ;";
+	return result;
+}
+
+// cAttack ====================================================================
+
+std::string cAttack::ToString() {
+	std::string result = "";
+	result += "component attack = [ ";
+	result += std::to_string(damage);
+	result += ", ";
+	result += std::to_string(range);
 	result += " ] ;";
 	return result;
 }
