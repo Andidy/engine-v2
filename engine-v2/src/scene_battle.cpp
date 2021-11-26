@@ -109,6 +109,52 @@ void BattleScene::Init() {
 	checkbox_is_active.text = "is_active";
 	entity_spawner_controls.push_back(&checkbox_is_active);
 
+	checkbox_health.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 5, 12, 12 };
+	checkbox_health.checked = false;
+	checkbox_health.text = "Health";
+	entity_spawner_controls.push_back(&checkbox_health);
+
+	vb_health.bounds = { anchor_EntitySpawner.x + 5 + 275 + 105, checkbox_health.bounds.y, 30, 20 };
+	vb_health.value = 5;
+	vb_health.text = "";
+	vb_health.min = 0;
+	vb_health.max = 100;
+	vb_health.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_health);
+
+	checkbox_attack.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 30, 12, 12 };
+	checkbox_attack.checked = false;
+	checkbox_attack.text = "Attack";
+	entity_spawner_controls.push_back(&checkbox_attack);
+
+	vb_atk_dmg.bounds = { anchor_EntitySpawner.x + 5 + 275 + 105, checkbox_attack.bounds.y, 30, 20 };
+	vb_atk_dmg.value = 1;
+	vb_atk_dmg.text = "Damage";
+	vb_atk_dmg.min = 0;
+	vb_atk_dmg.max = 100;
+	vb_atk_dmg.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_atk_dmg);
+
+	vb_atk_rng.bounds = { anchor_EntitySpawner.x + 5 + 275 + 175, checkbox_attack.bounds.y, 30, 20 };
+	vb_atk_rng.value = 1;
+	vb_atk_rng.text = "Range";
+	vb_atk_rng.min = 0;
+	vb_atk_rng.max = 100;
+	vb_atk_rng.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_atk_rng);
+
+	checkbox_faction.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 55, 12, 12 };
+	checkbox_faction.checked = false;
+	checkbox_faction.text = "Faction";
+	entity_spawner_controls.push_back(&checkbox_faction);
+
+	tb_faction_name.bounds = { anchor_EntitySpawner.x + 5 + 275 + 60, checkbox_faction.bounds.y, 125, 25 };
+	tb_faction_name.edit_mode = false;
+	tb_faction_name.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
+	strcpy_s(tb_faction_name.text, entity_spawner_text_size, "Friendly");
+	tb_faction_name.text_size = entity_spawner_text_size;
+	entity_spawner_controls.push_back(&tb_faction_name);
+
 	line_0.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 80, 275, 25 };
 	entity_spawner_controls.push_back(&line_0);
 
@@ -742,6 +788,12 @@ void BattleScene::Render() {
 		debug_gui_controls[i]->Draw();
 	}
 
+	if (checkbox_unit.checked) {
+		checkbox_health.checked = true;
+		checkbox_attack.checked = true;
+		checkbox_faction.checked = true;
+	}
+
 	// Entity Spawner
 	if (window_entity_spawner.is_active) {
 		spinner_texture_select.max = gs->textures.size() - 1;
@@ -771,15 +823,15 @@ void BattleScene::Render() {
 			ec.unit = checkbox_unit.checked;
 			
 			// for now just use some hardcoded values for health, attack, and faction
-			ec.attack = true;
-			ec.attack_damage = 1;
-			ec.attack_range = 1;
+			ec.attack = checkbox_attack.checked;
+			ec.attack_damage = vb_atk_dmg.value;
+			ec.attack_range = vb_atk_rng.value;
 
-			ec.health = true;
-			ec.health_max = 5;
+			ec.health = checkbox_health.checked;
+			ec.health_max = vb_health.value;
 
-			ec.faction = true;
-			ec.faction_name = "Friendly";
+			ec.faction = checkbox_faction.checked;
+			ec.faction_name = tb_faction_name.text;
 
 			selected_entity = em.CreateEntity(ec);
 		}

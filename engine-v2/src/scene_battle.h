@@ -50,6 +50,13 @@ struct BattleScene : Scene {
 	gui::CheckBox checkbox_grid_transform;
 	gui::CheckBox checkbox_unit;
 	gui::CheckBox checkbox_is_active;
+	gui::CheckBox checkbox_health;
+	gui::ValueBox vb_health;
+	gui::CheckBox checkbox_attack;
+	gui::ValueBox vb_atk_dmg;
+	gui::ValueBox vb_atk_rng;
+	gui::CheckBox checkbox_faction;
+	gui::TextBox tb_faction_name;
 	gui::Line line_0;
 	gui::Line line_1;
 	gui::Line line_2;
