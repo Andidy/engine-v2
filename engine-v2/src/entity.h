@@ -25,6 +25,9 @@ struct EntityContext {
 	bool attack = false;
 	int attack_damage = 0;
 	int attack_range = 0;
+
+	bool faction = false;
+	std::string faction_name;
 };
 
 struct Entity {
@@ -37,6 +40,7 @@ struct Entity {
 	int unit = -1;
 	int health = -1;
 	int attack = -1;
+	int faction = -1;
 
 	Entity() = default;
 

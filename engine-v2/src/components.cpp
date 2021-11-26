@@ -76,3 +76,13 @@ std::string cAttack::ToString() {
 	result += " ] ;";
 	return result;
 }
+
+// cFaction ===================================================================
+
+std::string cFaction::ToString() {
+	std::string result = "";
+	result += "component faction = [ ";
+	result += faction;
+	result += " ] ;";
+	return result;
+}

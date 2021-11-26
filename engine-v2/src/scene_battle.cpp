@@ -769,6 +769,17 @@ void BattleScene::Render() {
 			ec.grid_transform = checkbox_grid_transform.checked;
 			ec.gt_pos = gt_pos;
 			ec.unit = checkbox_unit.checked;
+			
+			// for now just use some hardcoded values for health, attack, and faction
+			ec.attack = true;
+			ec.attack_damage = 1;
+			ec.attack_range = 1;
+
+			ec.health = true;
+			ec.health_max = 5;
+
+			ec.faction = true;
+			ec.faction_name = "Friendly";
 
 			selected_entity = em.CreateEntity(ec);
 		}
@@ -821,6 +832,8 @@ void BattleScene::DrawGridLines() {
 void BattleScene::WriteEntityToFile() {
 	std::fstream file("entity.txt", std::ios::out);
 
+	file << "selected_entity = " << selected_entity << " ;\n";
+
 	for (Entity& e : em.entities) {
 		file << "entity = [\n";
 		file << "\tname = " << e.name << " ;\n";
@@ -837,6 +850,12 @@ void BattleScene::WriteEntityToFile() {
 		}
 		if (e.health != -1) {
 			file << "\t" << em.Health(e).ToString() << "\n";
+		}
+		if (e.attack != -1) {
+			file << "\t" << em.Attack(e).ToString() << "\n";
+		}
+		if (e.faction != -1) {
+			file << "\t" << em.Faction(e).ToString() << "\n";
 		}
 		file << "];\n";
 	}
@@ -857,7 +876,13 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 	while (file.good()) {
 		file >> file_contents;
 
-		if (file_contents == "entity") {
+		if (file_contents == "selected_entity") {
+			// ignore the "="
+			file >> ignore_string;
+			file >> selected_entity;
+			file >> ignore_string;
+		}
+		else if (file_contents == "entity") {
 			e = new Entity;
 			// We want to ignore the "= ["
 			file >> ignore_string >> ignore_string;
@@ -950,6 +975,32 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 						file >> ignore_string >> ignore_string;
 
 						e->health = em.AddHealth(h);
+					}
+					else if (file_contents == "attack") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+
+						// need to load the health component
+						cAttack a;
+						file >> a.damage >> ignore_string >> a.range;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->attack = em.AddAttack(a);
+					}
+					else if (file_contents == "faction") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+
+						// need to load the health component
+						cFaction f;
+						file >> f.faction;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->faction = em.AddFaction(f);
 					}
 				}
 				else if (file_contents == "];") {

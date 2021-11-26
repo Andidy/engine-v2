@@ -54,3 +54,13 @@ struct cAttack {
 
 	std::string ToString();
 };
+
+/*
+	Faction allows entities to be on the same or different teams, friends,
+	allies, enemies, neutral relationships can be handled using faction checks.
+*/
+struct cFaction {
+	std::string faction;
+
+	std::string ToString();
+};

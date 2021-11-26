@@ -18,6 +18,14 @@ cHealth& EntityManager::Health(Entity& e) {
 	return c_health[e.health];
 }
 
+cAttack& EntityManager::Attack(Entity& e) {
+	return c_attack[e.attack];
+}
+
+cFaction& EntityManager::Faction(Entity& e) {
+	return c_faction[e.faction];
+}
+
 // Add Component functions
 
 int EntityManager::AddGridTransform(cGridTransform& gt) {
@@ -47,6 +55,12 @@ int EntityManager::AddHealth(cHealth& h) {
 int EntityManager::AddAttack(cAttack& a) {
 	int index = (int)c_attack.size();
 	c_attack.push_back(a);
+	return index;
+}
+
+int EntityManager::AddFaction(cFaction& f) {
+	int index = (int)c_faction.size();
+	c_faction.push_back(f);
 	return index;
 }
 
@@ -87,6 +101,12 @@ int EntityManager::CreateEntity(EntityContext& ec) {
 		a.damage = ec.attack_damage;
 		a.range = ec.attack_range;
 		e.attack = AddAttack(a);
+	}
+
+	if (ec.faction) {
+		cFaction f;
+		f.faction = ec.faction_name;
+		e.faction = AddFaction(f);
 	}
 
 	// If the id is known and in the context use it
