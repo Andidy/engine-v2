@@ -55,3 +55,41 @@ void operator/= (Vector2& lhs, float s) {
 	lhs.x /= s;
 	lhs.y /= s;
 }
+
+namespace RaylibHelpers {
+
+	// Functions to shift raylib key codes into safe regions
+
+	int MapKeycode(int keycode) {
+		return keycode;
+	}
+
+	int MapMousecode(int keycode) {
+		return MOUSE_CODE_OFFSET + keycode;
+	}
+
+	int MapControllercode(int keycode) {
+		return CONTROLLER_CODE_OFFSET + keycode;
+	}
+
+	int MapControllerAxis(int axis) {
+		return CONTROLLER_CODE_OFFSET + MAX_GAMEPAD_BUTTONS + axis;
+	}
+
+	int UnmapKeycode(int code) {
+		return code;
+	}
+
+	int UnmapMousecode(int code) {
+		return code - MOUSE_CODE_OFFSET;
+	}
+
+	int UnmapControllercode(int code) {
+		return code - CONTROLLER_CODE_OFFSET;
+	}
+
+	int UnmapControllerAxis(int code) {
+		return code - CONTROLLER_CODE_OFFSET - MAX_GAMEPAD_BUTTONS;
+	}
+
+}
