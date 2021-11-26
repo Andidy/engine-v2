@@ -1,4 +1,4 @@
-#include "raylib_cpp_helpers.h"
+#include "raylib_helpers.h"
 
 std::istream& operator>>(std::istream& input, Color& c) {
     int r, g, b, a;
