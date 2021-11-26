@@ -106,13 +106,13 @@ int main(void) {
 
 		for (int mouse_button = 0; mouse_button < MAX_MOUSE_BUTTONS; mouse_button++) {
 			if (IsMouseButtonPressed(mouse_button) || IsMouseButtonReleased(mouse_button)) {
-				if (scene.action_map.find(rl_MouseToCode(mouse_button)) == scene.action_map.end()) {
+				if (scene.action_map.find(rlh::MapMousecode(mouse_button)) == scene.action_map.end()) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}
 
 				ActionType at = IsMouseButtonPressed(mouse_button) ? ActionType::START : ActionType::END;
-				Action action = Action(scene.action_map.at(rl_MouseToCode(mouse_button)), at);
+				Action action = Action(scene.action_map.at(rlh::MapMousecode(mouse_button)), at);
 				scene.action_queue.push(action);
 			}
 		}
@@ -123,19 +123,19 @@ int main(void) {
 			
 			for (int gamepad_button = 0; gamepad_button < MAX_GAMEPAD_BUTTONS; gamepad_button++) {
 				if (IsGamepadButtonPressed(gamepad, gamepad_button) || IsGamepadButtonReleased(gamepad, gamepad_button)) {
-					if (scene.action_map.find(rl_ControllerToCode(gamepad_button)) == scene.action_map.end()) {
+					if (scene.action_map.find(rlh::MapControllercode(gamepad_button)) == scene.action_map.end()) {
 						// Didn't find the keycode in the mapping
 						continue;
 					}
 
 					ActionType at = IsGamepadButtonPressed(gamepad, gamepad_button) ? ActionType::START : ActionType::END;
-					Action action = Action(scene.action_map.at(rl_ControllerToCode(gamepad_button)), at);
+					Action action = Action(scene.action_map.at(rlh::MapControllercode(gamepad_button)), at);
 					scene.action_queue.push(action);
 				}
 			}
 
 			for (int gamepad_axis = 0; gamepad_axis < NUM_CONTROLLER_AXIS; gamepad_axis++) {
-				if (scene.action_map.find(rl_ControllerAxisToCode(gamepad_axis)) == scene.action_map.end()) {
+				if (scene.action_map.find(rlh::MapControllerAxis(gamepad_axis)) == scene.action_map.end()) {
 					// Didn't find the keycode in the mapping
 					continue;
 				}

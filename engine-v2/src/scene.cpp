@@ -7,19 +7,19 @@ void Scene::RegisterAction(int input_type, int keycode, std::string action_name)
 	switch (input_type) {
 		case 0: // keyboard
 		{
-			keycode = rl_KeyboardToCode(keycode);
+			keycode = rlh::MapKeycode(keycode);
 		} break;
 		case 1: // mouse
 		{
-			keycode = rl_MouseToCode(keycode);
+			keycode = rlh::MapMousecode(keycode);
 		} break;
 		case 2: // controller
 		{
-			keycode = rl_ControllerToCode(keycode);
+			keycode = rlh::MapControllercode(keycode);
 		} break;
 		case 3: // controller axis
 		{
-			keycode = rl_CodeToControllerAxis(keycode);
+			keycode = rlh::MapControllerAxis(keycode);
 		} break;
 		default: __debugbreak(); // lol crashing 
 	}
