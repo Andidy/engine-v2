@@ -450,118 +450,27 @@ void BattleScene::Render() {
 			cUnit& c = em.Unit(e);
 			cRenderable& r = em.Renderable(e);
 
-			Color temp_r = r.tint_color;
+			Color temp_r = WHITE;
 			temp_r.a = 128; // set transparency to half
 
 			int movement_color = gs->texture_handles["Movement"];
+			int attack_color = gs->texture_handles["Attack"];
 
-			// 1 movement
-			Vector2 vl = r.pos;
-			Vector2 vr = r.pos;
-			Vector2 vu = r.pos;
-			Vector2 vd = r.pos;
-			vl.x -= 1 * gs->entity_scale;
-			vr.x += 1 * gs->entity_scale;
-			vu.y -= 1 * gs->entity_scale;
-			vd.y += 1 * gs->entity_scale;
+			FloodFillContext ffc;
+			ffc.remaining_movement_points = c.current_movement_points;
+			ffc.start = em.GridTransform(e).pos;
+			FloodFill(ffc);
 
-			// 2 movement
-			Vector2 vl2 = r.pos;
-			Vector2 vr2 = r.pos;
-			Vector2 vu2 = r.pos;
-			Vector2 vd2 = r.pos;
-			vl2.x -= 2 * gs->entity_scale;
-			vr2.x += 2 * gs->entity_scale;
-			vu2.y -= 2 * gs->entity_scale;
-			vd2.y += 2 * gs->entity_scale;
-			Vector2 diag0 = r.pos;
-			Vector2 diag1 = r.pos;
-			Vector2 diag2 = r.pos;
-			Vector2 diag3 = r.pos;
-			diag0.x -= 1 * gs->entity_scale;
-			diag0.y -= 1 * gs->entity_scale;
-			diag1.x -= 1 * gs->entity_scale;
-			diag1.y += 1 * gs->entity_scale;
-			diag2.x += 1 * gs->entity_scale;
-			diag2.y -= 1 * gs->entity_scale;
-			diag3.x += 1 * gs->entity_scale;
-			diag3.y += 1 * gs->entity_scale;
+			for (auto node : ffc.visited_vec) {
+				Vector2 pos = node;
+				pos *= gs->entity_scale;
+				DrawTextureEx(gs->textures[movement_color], pos, 0.0f, 1.0f, temp_r);
+			}
 
-			// 3 movement
-			Vector2 vl3 = r.pos;
-			Vector2 vr3 = r.pos;
-			Vector2 vu3 = r.pos;
-			Vector2 vd3 = r.pos;
-			vl3.x -= 3 * gs->entity_scale;
-			vr3.x += 3 * gs->entity_scale;
-			vu3.y -= 3 * gs->entity_scale;
-			vd3.y += 3 * gs->entity_scale;
-			Vector2 diag4 = r.pos;
-			Vector2 diag5 = r.pos;
-			Vector2 diag6 = r.pos;
-			Vector2 diag7 = r.pos;
-			Vector2 diag8 = r.pos;
-			Vector2 diag9 = r.pos;
-			Vector2 diag10 = r.pos;
-			Vector2 diag11 = r.pos;
-			diag4.x -= 2 * gs->entity_scale;
-			diag4.y -= 1 * gs->entity_scale;
-			diag5.x -= 2 * gs->entity_scale;
-			diag5.y += 1 * gs->entity_scale;
-			diag6.x += 2 * gs->entity_scale;
-			diag6.y -= 1 * gs->entity_scale;
-			diag7.x += 2 * gs->entity_scale;
-			diag7.y += 1 * gs->entity_scale;
-			diag8.x -= 1 * gs->entity_scale;
-			diag8.y -= 2 * gs->entity_scale;
-			diag9.x -= 1 * gs->entity_scale;
-			diag9.y += 2 * gs->entity_scale;
-			diag10.x += 1 * gs->entity_scale;
-			diag10.y -= 2 * gs->entity_scale;
-			diag11.x += 1 * gs->entity_scale;
-			diag11.y += 2 * gs->entity_scale;
-
-			switch (c.current_movement_points) {
-				case 3:
-				{
-					// Draw 3 movement
-					DrawTextureEx(gs->textures[movement_color], diag11, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag10, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag9, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag8, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag7, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag6, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag5, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag4, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vl3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd3, 0.0f, 1.0f, temp_r);
-					[[fallthrough]];
-				}
-				case 2:
-				{
-					// Draw 2 movement
-					DrawTextureEx(gs->textures[movement_color], diag3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag1, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag0, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vl2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd2, 0.0f, 1.0f, temp_r);
-					[[fallthrough]];
-				}
-				case 1:
-				{
-					// Draw 1 movement
-					DrawTextureEx(gs->textures[movement_color], vl, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd, 0.0f, 1.0f, temp_r);
-				} break;
-				case 0: break;
-				default: __debugbreak(); // something is wrong
+			for (auto node : ffc.edge_frontier) {
+				Vector2 pos = node;
+				pos *= gs->entity_scale;
+				DrawTextureEx(gs->textures[attack_color], pos, 0.0f, 1.0f, temp_r);
 			}
 
 			// Show path to mouse cursor
@@ -1001,15 +910,16 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 
 						// need to load the renderable component
 						cUnit u;
-						size_t num_waypoints = 0;
-						file >> u.waypoint_active >> ignore_string >> num_waypoints >> ignore_string;
+						//size_t num_waypoints = 0;
+						file >> u.current_movement_points >> ignore_string >> u.movement_points >> ignore_string;
 
+						/*
 						for (int i = 0; i < num_waypoints; i++) {
 							Vector2 v = {};
 							file >> v.x >> ignore_string >> v.y >> ignore_string;
 							u.waypoint_pos.push_back(v);
 						}
-
+						*/
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 
