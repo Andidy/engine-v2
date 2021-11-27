@@ -52,3 +52,12 @@ struct IVector2 {
 
 	operator Vector2() const { return { (float)x, (float)y }; }
 };
+
+struct IVector2Hash {
+	size_t operator()(const IVector2& v) const {
+		size_t r = 23;
+		r = r * 31 + v.x;
+		r = r * 31 + v.y;
+		return r;
+	}
+};
