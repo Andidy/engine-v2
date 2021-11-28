@@ -31,3 +31,21 @@ void operator-= (Vector2& lhs, const Vector2& rhs);
 void operator*= (Vector2& lhs, float s);
 
 void operator/= (Vector2& lhs, float s);
+
+// Key code adjustment constants and functions
+const int MOUSE_CODE_OFFSET = 400;
+const int CONTROLLER_CODE_OFFSET = 500;
+
+namespace RaylibHelpers {
+	int MapKeycode(int keycode);
+	int MapMousecode(int keycode);
+	int MapControllercode(int keycode);
+	int MapControllerAxis(int axis);
+	int UnmapKeycode(int code);
+	int UnmapMousecode(int code);
+	int UnmapControllercode(int code);
+	int UnmapControllerAxis(int code);
+}
+
+// Raylib Helper namespace shorthand
+namespace rlh = RaylibHelpers;
