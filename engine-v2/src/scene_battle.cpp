@@ -665,6 +665,14 @@ void BattleScene::Render() {
 		if (e.renderable >= 0) {
 			cRenderable& r = em.Renderable(e);
 			DrawTextureEx(gs->textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
+			if (e.health >= 0) {
+				cHealth& h = em.Health(e);
+				std::string str;
+				str += std::to_string(h.current);
+				str += " / ";
+				str += std::to_string(h.max);
+				DrawText(str.c_str(), r.pos.x, r.pos.y, 10, RED);
+			}
 		}
 	}
 
@@ -945,7 +953,7 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 						// need to load the renderable component
 						cUnit u;
 						//size_t num_waypoints = 0;
-						file >> u.current_movement_points >> ignore_string >> u.movement_points >> ignore_string;
+						file >> u.current_movement_points >> ignore_string >> u.movement_points;// >> ignore_string;
 
 						/*
 						for (int i = 0; i < num_waypoints; i++) {
