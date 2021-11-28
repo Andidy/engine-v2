@@ -170,6 +170,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\grid_map.h" />
     <ClInclude Include="src\IVector2.h" />
     <ClInclude Include="src\action.h" />
     <ClInclude Include="src\components.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\entity_manager.cpp" />
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\grid_map.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\movement.cpp" />
     <ClCompile Include="src\raygui_helpers.cpp" />

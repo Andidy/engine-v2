@@ -12,8 +12,6 @@
 #include "scene_battle.h"
 #include "scene_mainmenu.h"
 
-#include "movement.h"
-
 struct GameState {
 	// Assets / Textures ======================================================
 	int entity_scale = 32;

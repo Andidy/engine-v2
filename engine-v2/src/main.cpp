@@ -67,9 +67,16 @@ int main(void) {
 
 	// Load a blue texture to act as the movement range indicator.
 	{
-		int index = gs.textures.size();
+		size_t index = gs.textures.size();
 		gs.texture_handles.insert({ "Movement", index });
 		gs.textures.push_back(LoadTextureFromImage(GenImageColor(gs.entity_scale, gs.entity_scale, SKYBLUE)));
+	}
+
+	// Load a red texture to act as the attack range indicator.
+	{
+		size_t index = gs.textures.size();
+		gs.texture_handles.insert({ "Attack", index });
+		gs.textures.push_back(LoadTextureFromImage(GenImageColor(gs.entity_scale, gs.entity_scale, RED)));
 	}
 
 	//-------------------------------------------------------------------------

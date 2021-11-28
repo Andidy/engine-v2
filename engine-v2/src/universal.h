@@ -7,6 +7,9 @@
 #include <queue>
 #include <deque>
 #include <unordered_map>
+#include <unordered_set>
+#include <algorithm>
+#include <tuple>
 #include <fstream>
 #include <sstream>
 #include <iostream>

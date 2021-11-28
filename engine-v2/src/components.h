@@ -27,10 +27,40 @@ struct cRenderable {
 	a trading caravan, a fleet of ships, and a herd of animals.
 */
 struct cUnit {
-	int movement_points = 3;
+	int movement_points = 5;
 	int current_movement_points = movement_points;
-	bool waypoint_active = false; // is the movement waypoint active
-	std::deque<Vector2> waypoint_pos; // where the movement waypoint is
+	//bool waypoint_active = false; // is the movement waypoint active
+	//std::deque<Vector2> waypoint_pos; // where the movement waypoint is
 	
+	std::string ToString();
+};
+
+/*
+	Health allows an entity to take damage and die / be destroyed.
+*/
+struct cHealth {
+	int max;
+	int current;
+
+	std::string ToString();
+};
+
+/*
+	Attack allows an entity to deal damage to things.
+*/
+struct cAttack {
+	int damage;
+	int range;
+
+	std::string ToString();
+};
+
+/*
+	Faction allows entities to be on the same or different teams, friends,
+	allies, enemies, neutral relationships can be handled using faction checks.
+*/
+struct cFaction {
+	std::string faction;
+
 	std::string ToString();
 };

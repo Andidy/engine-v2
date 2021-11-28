@@ -6,7 +6,7 @@
 
 struct EntityContext {
 	bool is_active = false;
-	int32_t id = -1;
+	int id = -1;
 	std::string name;
 
 	bool renderable = false;
@@ -18,20 +18,33 @@ struct EntityContext {
 	IVector2 gt_pos = { 0, 0 };
 
 	bool unit = false;
+
+	bool health = false;
+	int health_max = 0;
+
+	bool attack = false;
+	int attack_damage = 0;
+	int attack_range = 0;
+
+	bool faction = false;
+	std::string faction_name;
 };
 
 struct Entity {
 	std::string name = "Unnamed";
-	int64_t id = -1;
+	int id = -1;
 	bool is_active = false;
 
-	int32_t grid_transform = -1;
-	int32_t renderable = -1;
-	int32_t unit = -1;
+	int grid_transform = -1;
+	int renderable = -1;
+	int unit = -1;
+	int health = -1;
+	int attack = -1;
+	int faction = -1;
 
 	Entity() = default;
 
-	Entity(std::string _name, int64_t _id, int32_t _grid_transform, int32_t _renderable, int32_t _unit) {
+	Entity(std::string _name, int _id, int _grid_transform, int _renderable, int _unit) {
 		name = _name;
 		id = _id;
 		grid_transform = _grid_transform;

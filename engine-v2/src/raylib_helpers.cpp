@@ -1,5 +1,13 @@
 #include "raylib_helpers.h"
 
+bool operator== (const Color& lhs, const Color& rhs) {
+	return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
+}
+
+bool operator!= (const Color& lhs, const Color& rhs) {
+	return !(lhs == rhs);
+}
+
 std::istream& operator>>(std::istream& input, Color& c) {
     int r, g, b, a;
     std::string ignore;
@@ -91,5 +99,4 @@ namespace RaylibHelpers {
 	int UnmapControllerAxis(int code) {
 		return code - CONTROLLER_CODE_OFFSET - MAX_GAMEPAD_BUTTONS;
 	}
-
 }

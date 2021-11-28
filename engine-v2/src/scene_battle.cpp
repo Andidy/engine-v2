@@ -109,6 +109,52 @@ void BattleScene::Init() {
 	checkbox_is_active.text = "is_active";
 	entity_spawner_controls.push_back(&checkbox_is_active);
 
+	checkbox_health.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 5, 12, 12 };
+	checkbox_health.checked = false;
+	checkbox_health.text = "Health";
+	entity_spawner_controls.push_back(&checkbox_health);
+
+	vb_health.bounds = { anchor_EntitySpawner.x + 5 + 275 + 105, checkbox_health.bounds.y, 30, 20 };
+	vb_health.value = 5;
+	vb_health.text = "";
+	vb_health.min = 0;
+	vb_health.max = 100;
+	vb_health.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_health);
+
+	checkbox_attack.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 30, 12, 12 };
+	checkbox_attack.checked = false;
+	checkbox_attack.text = "Attack";
+	entity_spawner_controls.push_back(&checkbox_attack);
+
+	vb_atk_dmg.bounds = { anchor_EntitySpawner.x + 5 + 275 + 105, checkbox_attack.bounds.y, 30, 20 };
+	vb_atk_dmg.value = 1;
+	vb_atk_dmg.text = "Damage";
+	vb_atk_dmg.min = 0;
+	vb_atk_dmg.max = 100;
+	vb_atk_dmg.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_atk_dmg);
+
+	vb_atk_rng.bounds = { anchor_EntitySpawner.x + 5 + 275 + 175, checkbox_attack.bounds.y, 30, 20 };
+	vb_atk_rng.value = 1;
+	vb_atk_rng.text = "Range";
+	vb_atk_rng.min = 0;
+	vb_atk_rng.max = 100;
+	vb_atk_rng.edit_mode = false;
+	entity_spawner_controls.push_back(&vb_atk_rng);
+
+	checkbox_faction.bounds = { anchor_EntitySpawner.x + 5 + 275, anchor_EntitySpawner.y + 55, 12, 12 };
+	checkbox_faction.checked = false;
+	checkbox_faction.text = "Faction";
+	entity_spawner_controls.push_back(&checkbox_faction);
+
+	tb_faction_name.bounds = { anchor_EntitySpawner.x + 5 + 275 + 60, checkbox_faction.bounds.y, 125, 25 };
+	tb_faction_name.edit_mode = false;
+	tb_faction_name.text = (char*)calloc(entity_spawner_text_size, sizeof(char));
+	strcpy_s(tb_faction_name.text, entity_spawner_text_size, "Friendly");
+	tb_faction_name.text_size = entity_spawner_text_size;
+	entity_spawner_controls.push_back(&tb_faction_name);
+
 	line_0.bounds = { anchor_EntitySpawner.x + 0, anchor_EntitySpawner.y + 80, 275, 25 };
 	entity_spawner_controls.push_back(&line_0);
 
@@ -338,12 +384,19 @@ void BattleScene::Update() {
 					Vector2 source = em.GridTransform(e).pos;
 					Vector2 dest = grid_pos;
 					int movement_points = em.Unit(e).current_movement_points;
-					BuildPathContext bpc = BuildPath(source, dest, movement_points);
-					if (bpc.found_path) {
+					
+					AStarContext asc;
+					asc.found_path = false;
+					asc.start = { (int)source.x, (int)source.y };
+					asc.goal = { (int)dest.x, (int)dest.y };
+					asc.remaining_movement_points = movement_points;
+					asc.gm = &map;
+					AStar(asc);
+					if (asc.found_path) {
 						std::cout << "Found Path\n";
-						while (bpc.orders.size() > 0) {
-							int dir = bpc.orders.front();
-							bpc.orders.pop_front();
+						while (asc.path.size() > 0) {
+							int dir = asc.path.front();
+							asc.path.pop_front();
 							switch (dir) {
 								case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
 								case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
@@ -351,7 +404,7 @@ void BattleScene::Update() {
 								case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
 							}
 						}
-						em.Unit(e).current_movement_points = bpc.remaining_movement_points;
+						em.Unit(e).current_movement_points = asc.remaining_movement_points;
 					}
 					else {
 						std::cout << "Did not find path\n";
@@ -374,6 +427,7 @@ void BattleScene::Update() {
 	}
 	else if (load) {
 		ReadEntityFromFile("entity.txt");
+		map.LoadMap("map.png");
 		load = false;
 	}
 	if (clear_save) {
@@ -395,6 +449,19 @@ void BattleScene::Render() {
 	ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 	BeginMode2D(camera);
 
+	for (auto& tile : map.tiles) {
+		size_t tex_handle = 0;
+		switch (tile.second.terrain_type) {
+			case 0: tex_handle = gs->texture_handles["grass"]; break;
+			case 1: tex_handle = gs->texture_handles["water"]; break;
+			case 2: tex_handle = gs->texture_handles["tree"]; break;
+		}
+
+		Vector2 pos = tile.second.pos;
+		pos *= gs->entity_scale;
+		DrawTextureEx(gs->textures[tex_handle], pos, 0.0f, 1.0f, WHITE);
+	}
+
 	DrawGridLines();
 
 	DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
@@ -404,118 +471,28 @@ void BattleScene::Render() {
 			cUnit& c = em.Unit(e);
 			cRenderable& r = em.Renderable(e);
 
-			Color temp_r = r.tint_color;
+			Color temp_r = WHITE;
 			temp_r.a = 128; // set transparency to half
 
 			int movement_color = gs->texture_handles["Movement"];
+			int attack_color = gs->texture_handles["Attack"];
 
-			// 1 movement
-			Vector2 vl = r.pos;
-			Vector2 vr = r.pos;
-			Vector2 vu = r.pos;
-			Vector2 vd = r.pos;
-			vl.x -= 1 * gs->entity_scale;
-			vr.x += 1 * gs->entity_scale;
-			vu.y -= 1 * gs->entity_scale;
-			vd.y += 1 * gs->entity_scale;
+			FloodFillContext ffc;
+			ffc.remaining_movement_points = c.current_movement_points;
+			ffc.start = em.GridTransform(e).pos;
+			ffc.gm = &map;
+			FloodFill(ffc);
 
-			// 2 movement
-			Vector2 vl2 = r.pos;
-			Vector2 vr2 = r.pos;
-			Vector2 vu2 = r.pos;
-			Vector2 vd2 = r.pos;
-			vl2.x -= 2 * gs->entity_scale;
-			vr2.x += 2 * gs->entity_scale;
-			vu2.y -= 2 * gs->entity_scale;
-			vd2.y += 2 * gs->entity_scale;
-			Vector2 diag0 = r.pos;
-			Vector2 diag1 = r.pos;
-			Vector2 diag2 = r.pos;
-			Vector2 diag3 = r.pos;
-			diag0.x -= 1 * gs->entity_scale;
-			diag0.y -= 1 * gs->entity_scale;
-			diag1.x -= 1 * gs->entity_scale;
-			diag1.y += 1 * gs->entity_scale;
-			diag2.x += 1 * gs->entity_scale;
-			diag2.y -= 1 * gs->entity_scale;
-			diag3.x += 1 * gs->entity_scale;
-			diag3.y += 1 * gs->entity_scale;
+			for (auto node : ffc.visited) {
+				Vector2 pos = node;
+				pos *= gs->entity_scale;
+				DrawTextureEx(gs->textures[movement_color], pos, 0.0f, 1.0f, temp_r);
+			}
 
-			// 3 movement
-			Vector2 vl3 = r.pos;
-			Vector2 vr3 = r.pos;
-			Vector2 vu3 = r.pos;
-			Vector2 vd3 = r.pos;
-			vl3.x -= 3 * gs->entity_scale;
-			vr3.x += 3 * gs->entity_scale;
-			vu3.y -= 3 * gs->entity_scale;
-			vd3.y += 3 * gs->entity_scale;
-			Vector2 diag4 = r.pos;
-			Vector2 diag5 = r.pos;
-			Vector2 diag6 = r.pos;
-			Vector2 diag7 = r.pos;
-			Vector2 diag8 = r.pos;
-			Vector2 diag9 = r.pos;
-			Vector2 diag10 = r.pos;
-			Vector2 diag11 = r.pos;
-			diag4.x -= 2 * gs->entity_scale;
-			diag4.y -= 1 * gs->entity_scale;
-			diag5.x -= 2 * gs->entity_scale;
-			diag5.y += 1 * gs->entity_scale;
-			diag6.x += 2 * gs->entity_scale;
-			diag6.y -= 1 * gs->entity_scale;
-			diag7.x += 2 * gs->entity_scale;
-			diag7.y += 1 * gs->entity_scale;
-			diag8.x -= 1 * gs->entity_scale;
-			diag8.y -= 2 * gs->entity_scale;
-			diag9.x -= 1 * gs->entity_scale;
-			diag9.y += 2 * gs->entity_scale;
-			diag10.x += 1 * gs->entity_scale;
-			diag10.y -= 2 * gs->entity_scale;
-			diag11.x += 1 * gs->entity_scale;
-			diag11.y += 2 * gs->entity_scale;
-
-			switch (c.current_movement_points) {
-				case 3:
-				{
-					// Draw 3 movement
-					DrawTextureEx(gs->textures[movement_color], diag11, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag10, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag9, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag8, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag7, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag6, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag5, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag4, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vl3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd3, 0.0f, 1.0f, temp_r);
-					[[fallthrough]];
-				}
-				case 2:
-				{
-					// Draw 2 movement
-					DrawTextureEx(gs->textures[movement_color], diag3, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag1, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], diag0, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vl2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu2, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd2, 0.0f, 1.0f, temp_r);
-					[[fallthrough]];
-				}
-				case 1:
-				{
-					// Draw 1 movement
-					DrawTextureEx(gs->textures[movement_color], vl, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vr, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vu, 0.0f, 1.0f, temp_r);
-					DrawTextureEx(gs->textures[movement_color], vd, 0.0f, 1.0f, temp_r);
-				} break;
-				case 0: break;
-				default: __debugbreak(); // something is wrong
+			for (auto node : ffc.edge_frontier) {
+				Vector2 pos = node;
+				pos *= gs->entity_scale;
+				DrawTextureEx(gs->textures[attack_color], pos, 0.0f, 1.0f, temp_r);
 			}
 
 			// Show path to mouse cursor
@@ -525,8 +502,17 @@ void BattleScene::Render() {
 				int movement_points = em.Unit(e).current_movement_points;
 
 				// Build path from unit to cursor
-				BuildPathContext bpc = BuildPath(source, dest, movement_points);
-				if (bpc.found_path) {
+				// BuildPathContext bpc = BuildPath(source, dest, movement_points);
+				//if (bpc.found_path) {
+				
+				AStarContext asc;
+				asc.found_path = false;
+				asc.start = { (int)source.x, (int)source.y };
+				asc.goal = { (int)dest.x, (int)dest.y };
+				asc.remaining_movement_points = movement_points;
+				asc.gm = &map;
+				AStar(asc);
+				if (asc.found_path) {
 					// Get texture handles for drawing the path
 					int arrow_butt = gs->texture_handles["arrow_butt"];
 					int arrow_head = gs->texture_handles["arrow_head"];
@@ -544,7 +530,7 @@ void BattleScene::Render() {
 					Rectangle dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
 
 					// Draw the arrow butt underneath the unit
-					switch (bpc.orders.front()) {
+					switch (asc.path.front()) {
 						case 1:
 						{
 							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 0.0f, WHITE);
@@ -568,13 +554,13 @@ void BattleScene::Render() {
 					}
 
 					// Draw the first segment that connects to the butt
-					for (int i = 1; i < bpc.orders.size(); i++) {
+					for (int i = 1; i < asc.path.size(); i++) {
 						pos = ghost * gs->entity_scale;
 						dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
 
 						// continuing in the same direction, use arrow_shaft
-						if (bpc.orders[i] == bpc.orders[i - 1]) {
-							switch (bpc.orders[i]) {
+						if (asc.path[i] == asc.path[i - 1]) {
+							switch (asc.path[i]) {
 								case 1:
 								{
 									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 0.0f, WHITE);
@@ -598,48 +584,48 @@ void BattleScene::Render() {
 							}
 						}
 						// changing the direction, use arrow_bend
-						if (bpc.orders[i] != bpc.orders[i - 1]) {
-							switch (bpc.orders[i]) {
+						if (asc.path[i] != asc.path[i - 1]) {
+							switch (asc.path[i]) {
 								case 1:
 								{
-									if (bpc.orders[i - 1] == 3) {
+									if (asc.path[i - 1] == 3) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
 										ghost.y -= 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 4) {
+									else if (asc.path[i - 1] == 4) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
 										ghost.y -= 1.0f;
 									}
 								} break;
 								case 2:
 								{
-									if (bpc.orders[i - 1] == 3) {
+									if (asc.path[i - 1] == 3) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
 										ghost.y += 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 4) {
+									else if (asc.path[i - 1] == 4) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
 										ghost.y += 1.0f;
 									}
 								} break;
 								case 3:
 								{
-									if (bpc.orders[i - 1] == 1) {
+									if (asc.path[i - 1] == 1) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
 										ghost.x -= 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 2) {
+									else if (asc.path[i - 1] == 2) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
 										ghost.x -= 1.0f;
 									}
 								} break;
 								case 4:
 								{
-									if (bpc.orders[i - 1] == 1) {
+									if (asc.path[i - 1] == 1) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
 										ghost.x += 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 2) {
+									else if (asc.path[i - 1] == 2) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
 										ghost.x += 1.0f;
 									}
@@ -651,7 +637,7 @@ void BattleScene::Render() {
 					// Draw the arrow head where the cursor is
 					pos = ghost * gs->entity_scale;
 					dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
-					switch (bpc.orders.back()) {
+					switch (asc.path.back()) {
 						case 1:
 						{
 							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 0.0f, WHITE);
@@ -742,6 +728,12 @@ void BattleScene::Render() {
 		debug_gui_controls[i]->Draw();
 	}
 
+	if (checkbox_unit.checked) {
+		checkbox_health.checked = true;
+		checkbox_attack.checked = true;
+		checkbox_faction.checked = true;
+	}
+
 	// Entity Spawner
 	if (window_entity_spawner.is_active) {
 		spinner_texture_select.max = gs->textures.size() - 1;
@@ -769,6 +761,17 @@ void BattleScene::Render() {
 			ec.grid_transform = checkbox_grid_transform.checked;
 			ec.gt_pos = gt_pos;
 			ec.unit = checkbox_unit.checked;
+			
+			// for now just use some hardcoded values for health, attack, and faction
+			ec.attack = checkbox_attack.checked;
+			ec.attack_damage = vb_atk_dmg.value;
+			ec.attack_range = vb_atk_rng.value;
+
+			ec.health = checkbox_health.checked;
+			ec.health_max = vb_health.value;
+
+			ec.faction = checkbox_faction.checked;
+			ec.faction_name = tb_faction_name.text;
 
 			selected_entity = em.CreateEntity(ec);
 		}
@@ -821,6 +824,8 @@ void BattleScene::DrawGridLines() {
 void BattleScene::WriteEntityToFile() {
 	std::fstream file("entity.txt", std::ios::out);
 
+	file << "selected_entity = " << selected_entity << " ;\n";
+
 	for (Entity& e : em.entities) {
 		file << "entity = [\n";
 		file << "\tname = " << e.name << " ;\n";
@@ -834,6 +839,15 @@ void BattleScene::WriteEntityToFile() {
 		}
 		if (e.unit != -1) {
 			file << "\t" << em.Unit(e).ToString() << "\n";
+		}
+		if (e.health != -1) {
+			file << "\t" << em.Health(e).ToString() << "\n";
+		}
+		if (e.attack != -1) {
+			file << "\t" << em.Attack(e).ToString() << "\n";
+		}
+		if (e.faction != -1) {
+			file << "\t" << em.Faction(e).ToString() << "\n";
 		}
 		file << "];\n";
 	}
@@ -854,7 +868,13 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 	while (file.good()) {
 		file >> file_contents;
 
-		if (file_contents == "entity") {
+		if (file_contents == "selected_entity") {
+			// ignore the "="
+			file >> ignore_string;
+			file >> selected_entity;
+			file >> ignore_string;
+		}
+		else if (file_contents == "entity") {
 			e = new Entity;
 			// We want to ignore the "= ["
 			file >> ignore_string >> ignore_string;
@@ -921,19 +941,59 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 
 						// need to load the renderable component
 						cUnit u;
-						size_t num_waypoints = 0;
-						file >> u.waypoint_active >> ignore_string >> num_waypoints >> ignore_string;
+						//size_t num_waypoints = 0;
+						file >> u.current_movement_points >> ignore_string >> u.movement_points >> ignore_string;
 
+						/*
 						for (int i = 0; i < num_waypoints; i++) {
 							Vector2 v = {};
 							file >> v.x >> ignore_string >> v.y >> ignore_string;
 							u.waypoint_pos.push_back(v);
 						}
-
+						*/
 						// ignore the "] ;"
 						file >> ignore_string >> ignore_string;
 
 						e->unit = em.AddUnit(u);
+					}
+					else if (file_contents == "health") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+						
+						// need to load the health component
+						cHealth h;
+						file >> h.current >> ignore_string >> h.max;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->health = em.AddHealth(h);
+					}
+					else if (file_contents == "attack") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+
+						// need to load the health component
+						cAttack a;
+						file >> a.damage >> ignore_string >> a.range;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->attack = em.AddAttack(a);
+					}
+					else if (file_contents == "faction") {
+						// ignore the "= ["
+						file >> ignore_string >> ignore_string;
+
+						// need to load the health component
+						cFaction f;
+						file >> f.faction;
+
+						// ignore the "] ;"
+						file >> ignore_string >> ignore_string;
+
+						e->faction = em.AddFaction(f);
 					}
 				}
 				else if (file_contents == "];") {

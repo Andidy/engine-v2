@@ -2,7 +2,11 @@
 
 #include "universal.h"
 
-// Extraction Operator Overload for Color struct
+// Operator Overloads for Color struct
+
+bool operator== (const Color& lhs, const Color& rhs);
+
+bool operator!= (const Color& lhs, const Color& rhs);
 
 std::istream& operator>>(std::istream& input, Color& c);
 
