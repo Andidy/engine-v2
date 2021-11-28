@@ -2,6 +2,9 @@
 
 #include "scene.h"
 
+#include "grid_map.h"
+#include "movement.h"
+
 struct BattleScene : Scene {
 	// Game ===============================================
 	int selected_entity = -1;
@@ -27,6 +30,8 @@ struct BattleScene : Scene {
 	bool load = false;
 	bool clear_save = false;
 	bool debug = false;
+
+	GridMap map;
 
 	// Rendering and Gui ==================================
 	Vector2 origin_debug_region;

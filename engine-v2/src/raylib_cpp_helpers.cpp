@@ -1,5 +1,13 @@
 #include "raylib_cpp_helpers.h"
 
+bool operator== (const Color& lhs, const Color& rhs) {
+	return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
+}
+
+bool operator!= (const Color& lhs, const Color& rhs) {
+	return !(lhs == rhs);
+}
+
 std::istream& operator>>(std::istream& input, Color& c) {
     int r, g, b, a;
     std::string ignore;
