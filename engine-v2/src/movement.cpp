@@ -26,7 +26,7 @@ void FloodFill(FloodFillContext& ffc) {
 				for (int i = 0; i < num_directions; i++) {
 					IVector2 dir = directions[i];
 					if (ffc.gm->tiles.find(dir) != ffc.gm->tiles.end()) {
-						if (ffc.gm->tiles[dir].is_land) {
+						if (ffc.gm->tiles.at(dir).is_land) {
 							if (ffc.visited.find(dir) == ffc.visited.end()) {
 								int pathCost = cost + terrain_costs[ffc.gm->tiles[dir].terrain_type];
 
@@ -49,7 +49,7 @@ void FloodFill(FloodFillContext& ffc) {
 				for (int i = 0; i < num_directions; i++) {
 					IVector2 dir = directions[i];
 					if (ffc.gm->tiles.find(dir) != ffc.gm->tiles.end()) {
-						if (ffc.gm->tiles[dir].is_land) {
+						if (ffc.gm->tiles.at(dir).is_land) {
 							if (ffc.visited.find(dir) == ffc.visited.end()) {
 								int pathCost = cost + 1;
 
@@ -111,15 +111,17 @@ void AStar(AStarContext& asc) {
 		};
 
 		for (int i = 0; i < num_directions; i++) {
-			Tile t = asc.gm->tiles[directions[i]];
-			if (t.is_land) {
-				int new_cost = asc.costs[curr_tile] + terrain_costs[t.terrain_type];
+			if (asc.gm->tiles.find(directions[i]) != asc.gm->tiles.end()) {
+				Tile t = asc.gm->tiles.at(directions[i]);
+				if (t.is_land) {
+					int new_cost = asc.costs[curr_tile] + terrain_costs[t.terrain_type];
 
-				if (asc.costs.find(directions[i]) == asc.costs.end() || new_cost < asc.costs[directions[i]]) {
-					asc.costs[directions[i]] = new_cost;
-					int priority = new_cost + AStarHeuristic(directions[i], asc.goal);
-					asc.frontier.put(directions[i], priority);
-					asc.from[directions[i]] = curr_tile;
+					if (asc.costs.find(directions[i]) == asc.costs.end() || new_cost < asc.costs[directions[i]]) {
+						asc.costs[directions[i]] = new_cost;
+						int priority = new_cost + AStarHeuristic(directions[i], asc.goal);
+						asc.frontier.put(directions[i], priority);
+						asc.from[directions[i]] = curr_tile;
+					}
 				}
 			}
 		}

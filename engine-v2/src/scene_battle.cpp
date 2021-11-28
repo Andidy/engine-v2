@@ -379,37 +379,56 @@ void BattleScene::Update() {
 					reset_movement = false;
 				}
 
-				// Move the unit
+				// Attack or Move the unit
 				if (entity_action) {
 					Vector2 source = em.GridTransform(e).pos;
 					Vector2 dest = grid_pos;
 					int movement_points = em.Unit(e).current_movement_points;
-					
-					AStarContext asc;
-					asc.found_path = false;
-					asc.start = { (int)source.x, (int)source.y };
-					asc.goal = { (int)dest.x, (int)dest.y };
-					asc.remaining_movement_points = movement_points;
-					asc.gm = &map;
-					AStar(asc);
-					if (asc.found_path) {
-						std::cout << "Found Path\n";
-						while (asc.path.size() > 0) {
-							int dir = asc.path.front();
-							asc.path.pop_front();
-							switch (dir) {
-								case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
-								case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
-								case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
-								case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
+
+					// Check if dest is a neighboring grid space
+					bool attacked_adjacent_unit = false;
+					Vector2 delta = dest - source;
+					if ((abs(delta.x) == 1) != (abs(delta.y) == 1)) {
+						// Check if the neighboring grid space has a unit
+						for (Entity& ne : em.entities) {
+							if ((ne.unit >= 0) && (ne.grid_transform >= 0) && (em.GridTransform(ne).pos == dest)) {
+								// Check if the unit
+								if ((ne.faction >= 0) && (em.Faction(ne).faction != em.Faction(e).faction)) {
+									em.Health(ne).current -= em.Attack(e).damage;
+									attacked_adjacent_unit = true;
+								}
+								break;
 							}
 						}
-						em.Unit(e).current_movement_points = asc.remaining_movement_points;
-					}
-					else {
-						std::cout << "Did not find path\n";
 					}
 
+					// if we didn't attack an adjacent unit, move to the dest
+					if (!attacked_adjacent_unit) {
+						AStarContext asc;
+						asc.found_path = false;
+						asc.start = { (int)source.x, (int)source.y };
+						asc.goal = { (int)dest.x, (int)dest.y };
+						asc.remaining_movement_points = movement_points;
+						asc.gm = &map;
+						AStar(asc);
+						if (asc.found_path) {
+							std::cout << "Found Path\n";
+							while (asc.path.size() > 0) {
+								int dir = asc.path.front();
+								asc.path.pop_front();
+								switch (dir) {
+									case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
+									case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
+									case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
+									case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
+								}
+							}
+							em.Unit(e).current_movement_points = asc.remaining_movement_points;
+						}
+						else {
+							std::cout << "Did not find path\n";
+						}
+					}
 					entity_action = false;
 				}
 			}
@@ -466,10 +485,11 @@ void BattleScene::Render() {
 
 	DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
-	for (Entity& e : em.entities) {
-		if (e.unit >= 0 && e.renderable >= 0) {
-			cUnit& c = em.Unit(e);
-			cRenderable& r = em.Renderable(e);
+	if (selected_entity >= 0) {
+		Entity& sel_ent = em.entities[selected_entity];
+		if (sel_ent.unit >= 0 && sel_ent.renderable >= 0) {
+			cUnit& c = em.Unit(sel_ent);
+			cRenderable& r = em.Renderable(sel_ent);
 
 			Color temp_r = WHITE;
 			temp_r.a = 128; // set transparency to half
@@ -479,7 +499,7 @@ void BattleScene::Render() {
 
 			FloodFillContext ffc;
 			ffc.remaining_movement_points = c.current_movement_points;
-			ffc.start = em.GridTransform(e).pos;
+			ffc.start = em.GridTransform(sel_ent).pos;
 			ffc.gm = &map;
 			FloodFill(ffc);
 
@@ -496,15 +516,15 @@ void BattleScene::Render() {
 			}
 
 			// Show path to mouse cursor
-			if (grid_pos != em.GridTransform(e).pos) {
-				Vector2 source = em.GridTransform(e).pos;
+			if (grid_pos != em.GridTransform(sel_ent).pos) {
+				Vector2 source = em.GridTransform(sel_ent).pos;
 				Vector2 dest = grid_pos;
-				int movement_points = em.Unit(e).current_movement_points;
+				int movement_points = em.Unit(sel_ent).current_movement_points;
 
 				// Build path from unit to cursor
 				// BuildPathContext bpc = BuildPath(source, dest, movement_points);
 				//if (bpc.found_path) {
-				
+
 				AStarContext asc;
 				asc.found_path = false;
 				asc.start = { (int)source.x, (int)source.y };
@@ -521,7 +541,7 @@ void BattleScene::Render() {
 					int cursor_tile = gs->texture_handles["cursor_tile"];
 
 					// Draw the path arrow
-					Vector2 ghost = em.GridTransform(e).pos;
+					Vector2 ghost = em.GridTransform(sel_ent).pos;
 
 					// Parameters for the drawing
 					Rectangle src = { 0, 0, 16, 16 };
@@ -658,10 +678,20 @@ void BattleScene::Render() {
 				}
 			}
 		}
+	}
 
+	for (Entity& e : em.entities) {
 		if (e.renderable >= 0) {
 			cRenderable& r = em.Renderable(e);
 			DrawTextureEx(gs->textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
+			if (e.health >= 0) {
+				cHealth& h = em.Health(e);
+				std::string str;
+				str += std::to_string(h.current);
+				str += " / ";
+				str += std::to_string(h.max);
+				DrawText(str.c_str(), r.pos.x, r.pos.y, 10, RED);
+			}
 		}
 	}
 
@@ -942,7 +972,7 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 						// need to load the renderable component
 						cUnit u;
 						//size_t num_waypoints = 0;
-						file >> u.current_movement_points >> ignore_string >> u.movement_points >> ignore_string;
+						file >> u.current_movement_points >> ignore_string >> u.movement_points;// >> ignore_string;
 
 						/*
 						for (int i = 0; i < num_waypoints; i++) {
