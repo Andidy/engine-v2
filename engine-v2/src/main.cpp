@@ -1,5 +1,9 @@
 #include "universal.h"
 
+size_t str_hash(std::string s) {
+	return std::hash<std::string>()(s);
+}
+
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 

@@ -210,64 +210,64 @@ void BattleScene::Update() {
 		auto& action = action_queue.front();
 
 		// Debugging Actions
-		if (action.action == "DEBUG") {
+		if (action.hash == str_hash("DEBUG")) {
 			debug = action.type == ActionType::START;
 		}
 
 		// IO
-		if (action.action == "SAVEGAME") {
+		if (action.hash == str_hash("SAVEGAME")) {
 			save = action.type == ActionType::END;
 		}
-		if (action.action == "LOADGAME") {
+		if (action.hash == str_hash("LOADGAME")) {
 			load = action.type == ActionType::END;
 		}
-		if (action.action == "DELETESAVE") {
+		if (action.hash == str_hash("DELETESAVE")) {
 			clear_save = action.type == ActionType::END;
 		}
 
 		// Camera Actions
-		if (action.action == "CAMERA_UP") {
+		if (action.hash == str_hash("CAMERA_UP")) {
 			camera_up = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_DOWN") {
+		if (action.hash == str_hash("CAMERA_DOWN")) {
 			camera_down = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_LEFT") {
+		if (action.hash == str_hash("CAMERA_LEFT")) {
 			camera_left = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_RIGHT") {
+		if (action.hash == str_hash("CAMERA_RIGHT")) {
 			camera_right = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_BOOST") {
+		if (action.hash == str_hash("CAMERA_BOOST")) {
 			camera_boost = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_ZOOM_IN") {
+		if (action.hash == str_hash("CAMERA_ZOOM_IN")) {
 			camera_zoom_in = action.type == ActionType::START;
 		}
-		if (action.action == "CAMERA_ZOOM_OUT") {
+		if (action.hash == str_hash("CAMERA_ZOOM_OUT")) {
 			camera_zoom_out = action.type == ActionType::START;
 		}
 
 		// Entity Actions
-		if (action.action == "ENTITY_UP") {
+		if (action.hash == str_hash("ENTITY_UP")) {
 			entity_up = action.type == ActionType::END;
 		}
-		if (action.action == "ENTITY_DOWN") {
+		if (action.hash == str_hash("ENTITY_DOWN")) {
 			entity_down = action.type == ActionType::END;
 		}
-		if (action.action == "ENTITY_LEFT") {
+		if (action.hash == str_hash("ENTITY_LEFT")) {
 			entity_left = action.type == ActionType::END;
 		}
-		if (action.action == "ENTITY_RIGHT") {
+		if (action.hash == str_hash("ENTITY_RIGHT")) {
 			entity_right = action.type == ActionType::END;
 		}
-		if (action.action == "ENTITY_SELECT") {
+		if (action.hash == str_hash("ENTITY_SELECT")) {
 			entity_select = action.type == ActionType::END;
 		}
-		if (action.action == "ENTITY_ACTION") {
+		if (action.hash == str_hash("ENTITY_ACTION")) {
 			entity_action = action.type == ActionType::END;
 		}
-		if (action.action == "RESET_MOVEMENT") {
+		if (action.hash == str_hash("RESET_MOVEMENT")) {
 			reset_movement = action.type == ActionType::END;
 		}
 

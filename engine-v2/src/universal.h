@@ -14,6 +14,8 @@
 #include <sstream>
 #include <iostream>
 
+size_t str_hash(std::string s);
+
 #include "config.h"
 // this is here because raylib's config defaults to 8
 // which is 2 higher than neccesary for standard controllers

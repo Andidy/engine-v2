@@ -10,10 +10,8 @@ enum class ActionType {
 };
 
 struct Action {
-	std::string action;
-	// int action_hash; // this will replace the string version of action to lower the amount of memory being passed around
+	size_t hash; // hashed string of action name
 	ActionType type;
 
-	Action(const std::string& action_name, ActionType type);
-	void PrintString();
+	Action(size_t hash, ActionType type);
 };
