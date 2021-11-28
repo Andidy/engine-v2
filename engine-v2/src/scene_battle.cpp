@@ -384,12 +384,19 @@ void BattleScene::Update() {
 					Vector2 source = em.GridTransform(e).pos;
 					Vector2 dest = grid_pos;
 					int movement_points = em.Unit(e).current_movement_points;
-					BuildPathContext bpc = BuildPath(source, dest, movement_points);
-					if (bpc.found_path) {
+					
+					AStarContext asc;
+					asc.found_path = false;
+					asc.start = { (int)source.x, (int)source.y };
+					asc.goal = { (int)dest.x, (int)dest.y };
+					asc.remaining_movement_points = movement_points;
+					asc.gm = &map;
+					AStar(asc);
+					if (asc.found_path) {
 						std::cout << "Found Path\n";
-						while (bpc.orders.size() > 0) {
-							int dir = bpc.orders.front();
-							bpc.orders.pop_front();
+						while (asc.path.size() > 0) {
+							int dir = asc.path.front();
+							asc.path.pop_front();
 							switch (dir) {
 								case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
 								case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
@@ -397,7 +404,7 @@ void BattleScene::Update() {
 								case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
 							}
 						}
-						em.Unit(e).current_movement_points = bpc.remaining_movement_points;
+						em.Unit(e).current_movement_points = asc.remaining_movement_points;
 					}
 					else {
 						std::cout << "Did not find path\n";
@@ -420,6 +427,7 @@ void BattleScene::Update() {
 	}
 	else if (load) {
 		ReadEntityFromFile("entity.txt");
+		map.LoadMap("map.png");
 		load = false;
 	}
 	if (clear_save) {
@@ -441,6 +449,19 @@ void BattleScene::Render() {
 	ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 	BeginMode2D(camera);
 
+	for (auto& tile : map.tiles) {
+		size_t tex_handle = 0;
+		switch (tile.second.terrain_type) {
+			case 0: tex_handle = gs->texture_handles["grass"]; break;
+			case 1: tex_handle = gs->texture_handles["water"]; break;
+			case 2: tex_handle = gs->texture_handles["tree"]; break;
+		}
+
+		Vector2 pos = tile.second.pos;
+		pos *= gs->entity_scale;
+		DrawTextureEx(gs->textures[tex_handle], pos, 0.0f, 1.0f, WHITE);
+	}
+
 	DrawGridLines();
 
 	DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
@@ -459,9 +480,10 @@ void BattleScene::Render() {
 			FloodFillContext ffc;
 			ffc.remaining_movement_points = c.current_movement_points;
 			ffc.start = em.GridTransform(e).pos;
+			ffc.gm = &map;
 			FloodFill(ffc);
 
-			for (auto node : ffc.visited_vec) {
+			for (auto node : ffc.visited) {
 				Vector2 pos = node;
 				pos *= gs->entity_scale;
 				DrawTextureEx(gs->textures[movement_color], pos, 0.0f, 1.0f, temp_r);
@@ -480,8 +502,17 @@ void BattleScene::Render() {
 				int movement_points = em.Unit(e).current_movement_points;
 
 				// Build path from unit to cursor
-				BuildPathContext bpc = BuildPath(source, dest, movement_points);
-				if (bpc.found_path) {
+				// BuildPathContext bpc = BuildPath(source, dest, movement_points);
+				//if (bpc.found_path) {
+				
+				AStarContext asc;
+				asc.found_path = false;
+				asc.start = { (int)source.x, (int)source.y };
+				asc.goal = { (int)dest.x, (int)dest.y };
+				asc.remaining_movement_points = movement_points;
+				asc.gm = &map;
+				AStar(asc);
+				if (asc.found_path) {
 					// Get texture handles for drawing the path
 					int arrow_butt = gs->texture_handles["arrow_butt"];
 					int arrow_head = gs->texture_handles["arrow_head"];
@@ -499,7 +530,7 @@ void BattleScene::Render() {
 					Rectangle dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
 
 					// Draw the arrow butt underneath the unit
-					switch (bpc.orders.front()) {
+					switch (asc.path.front()) {
 						case 1:
 						{
 							DrawTexturePro(gs->textures[arrow_butt], src, dest, origin, 0.0f, WHITE);
@@ -523,13 +554,13 @@ void BattleScene::Render() {
 					}
 
 					// Draw the first segment that connects to the butt
-					for (int i = 1; i < bpc.orders.size(); i++) {
+					for (int i = 1; i < asc.path.size(); i++) {
 						pos = ghost * gs->entity_scale;
 						dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
 
 						// continuing in the same direction, use arrow_shaft
-						if (bpc.orders[i] == bpc.orders[i - 1]) {
-							switch (bpc.orders[i]) {
+						if (asc.path[i] == asc.path[i - 1]) {
+							switch (asc.path[i]) {
 								case 1:
 								{
 									DrawTexturePro(gs->textures[arrow_shaft], src, dest, origin, 0.0f, WHITE);
@@ -553,48 +584,48 @@ void BattleScene::Render() {
 							}
 						}
 						// changing the direction, use arrow_bend
-						if (bpc.orders[i] != bpc.orders[i - 1]) {
-							switch (bpc.orders[i]) {
+						if (asc.path[i] != asc.path[i - 1]) {
+							switch (asc.path[i]) {
 								case 1:
 								{
-									if (bpc.orders[i - 1] == 3) {
+									if (asc.path[i - 1] == 3) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
 										ghost.y -= 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 4) {
+									else if (asc.path[i - 1] == 4) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
 										ghost.y -= 1.0f;
 									}
 								} break;
 								case 2:
 								{
-									if (bpc.orders[i - 1] == 3) {
+									if (asc.path[i - 1] == 3) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
 										ghost.y += 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 4) {
+									else if (asc.path[i - 1] == 4) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
 										ghost.y += 1.0f;
 									}
 								} break;
 								case 3:
 								{
-									if (bpc.orders[i - 1] == 1) {
+									if (asc.path[i - 1] == 1) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 90.0f, WHITE);
 										ghost.x -= 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 2) {
+									else if (asc.path[i - 1] == 2) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 180.0f, WHITE);
 										ghost.x -= 1.0f;
 									}
 								} break;
 								case 4:
 								{
-									if (bpc.orders[i - 1] == 1) {
+									if (asc.path[i - 1] == 1) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 0.0f, WHITE);
 										ghost.x += 1.0f;
 									}
-									else if (bpc.orders[i - 1] == 2) {
+									else if (asc.path[i - 1] == 2) {
 										DrawTexturePro(gs->textures[arrow_bend], src, dest, origin, 270.0f, WHITE);
 										ghost.x += 1.0f;
 									}
@@ -606,7 +637,7 @@ void BattleScene::Render() {
 					// Draw the arrow head where the cursor is
 					pos = ghost * gs->entity_scale;
 					dest = { pos.x + src.width, pos.y + src.height, src.width * 2.0f, src.height * 2.0f };
-					switch (bpc.orders.back()) {
+					switch (asc.path.back()) {
 						case 1:
 						{
 							DrawTexturePro(gs->textures[arrow_head], src, dest, origin, 0.0f, WHITE);
