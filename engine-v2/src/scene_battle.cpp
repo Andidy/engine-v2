@@ -466,10 +466,11 @@ void BattleScene::Render() {
 
 	DrawText("This is the game window", 190, 200, 20, LIGHTGRAY);
 
-	for (Entity& e : em.entities) {
-		if (e.unit >= 0 && e.renderable >= 0) {
-			cUnit& c = em.Unit(e);
-			cRenderable& r = em.Renderable(e);
+	if (selected_entity >= 0) {
+		Entity& sel_ent = em.entities[selected_entity];
+		if (sel_ent.unit >= 0 && sel_ent.renderable >= 0) {
+			cUnit& c = em.Unit(sel_ent);
+			cRenderable& r = em.Renderable(sel_ent);
 
 			Color temp_r = WHITE;
 			temp_r.a = 128; // set transparency to half
@@ -479,7 +480,7 @@ void BattleScene::Render() {
 
 			FloodFillContext ffc;
 			ffc.remaining_movement_points = c.current_movement_points;
-			ffc.start = em.GridTransform(e).pos;
+			ffc.start = em.GridTransform(sel_ent).pos;
 			ffc.gm = &map;
 			FloodFill(ffc);
 
@@ -496,15 +497,15 @@ void BattleScene::Render() {
 			}
 
 			// Show path to mouse cursor
-			if (grid_pos != em.GridTransform(e).pos) {
-				Vector2 source = em.GridTransform(e).pos;
+			if (grid_pos != em.GridTransform(sel_ent).pos) {
+				Vector2 source = em.GridTransform(sel_ent).pos;
 				Vector2 dest = grid_pos;
-				int movement_points = em.Unit(e).current_movement_points;
+				int movement_points = em.Unit(sel_ent).current_movement_points;
 
 				// Build path from unit to cursor
 				// BuildPathContext bpc = BuildPath(source, dest, movement_points);
 				//if (bpc.found_path) {
-				
+
 				AStarContext asc;
 				asc.found_path = false;
 				asc.start = { (int)source.x, (int)source.y };
@@ -521,7 +522,7 @@ void BattleScene::Render() {
 					int cursor_tile = gs->texture_handles["cursor_tile"];
 
 					// Draw the path arrow
-					Vector2 ghost = em.GridTransform(e).pos;
+					Vector2 ghost = em.GridTransform(sel_ent).pos;
 
 					// Parameters for the drawing
 					Rectangle src = { 0, 0, 16, 16 };
@@ -658,7 +659,9 @@ void BattleScene::Render() {
 				}
 			}
 		}
+	}
 
+	for (Entity& e : em.entities) {
 		if (e.renderable >= 0) {
 			cRenderable& r = em.Renderable(e);
 			DrawTextureEx(gs->textures[r.texture_handle], r.pos, 0.0f, 1.0f, r.tint_color);
