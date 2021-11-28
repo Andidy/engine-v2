@@ -379,37 +379,56 @@ void BattleScene::Update() {
 					reset_movement = false;
 				}
 
-				// Move the unit
+				// Attack or Move the unit
 				if (entity_action) {
 					Vector2 source = em.GridTransform(e).pos;
 					Vector2 dest = grid_pos;
 					int movement_points = em.Unit(e).current_movement_points;
-					
-					AStarContext asc;
-					asc.found_path = false;
-					asc.start = { (int)source.x, (int)source.y };
-					asc.goal = { (int)dest.x, (int)dest.y };
-					asc.remaining_movement_points = movement_points;
-					asc.gm = &map;
-					AStar(asc);
-					if (asc.found_path) {
-						std::cout << "Found Path\n";
-						while (asc.path.size() > 0) {
-							int dir = asc.path.front();
-							asc.path.pop_front();
-							switch (dir) {
-								case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
-								case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
-								case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
-								case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
+
+					// Check if dest is a neighboring grid space
+					bool attacked_adjacent_unit = false;
+					Vector2 delta = dest - source;
+					if ((abs(delta.x) == 1) != (abs(delta.y) == 1)) {
+						// Check if the neighboring grid space has a unit
+						for (Entity& ne : em.entities) {
+							if ((ne.unit >= 0) && (ne.grid_transform >= 0) && (em.GridTransform(ne).pos == dest)) {
+								// Check if the unit
+								if ((ne.faction >= 0) && (em.Faction(ne).faction != em.Faction(e).faction)) {
+									em.Health(ne).current -= em.Attack(e).damage;
+									attacked_adjacent_unit = true;
+								}
+								break;
 							}
 						}
-						em.Unit(e).current_movement_points = asc.remaining_movement_points;
-					}
-					else {
-						std::cout << "Did not find path\n";
 					}
 
+					// if we didn't attack an adjacent unit, move to the dest
+					if (!attacked_adjacent_unit) {
+						AStarContext asc;
+						asc.found_path = false;
+						asc.start = { (int)source.x, (int)source.y };
+						asc.goal = { (int)dest.x, (int)dest.y };
+						asc.remaining_movement_points = movement_points;
+						asc.gm = &map;
+						AStar(asc);
+						if (asc.found_path) {
+							std::cout << "Found Path\n";
+							while (asc.path.size() > 0) {
+								int dir = asc.path.front();
+								asc.path.pop_front();
+								switch (dir) {
+									case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
+									case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
+									case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
+									case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
+								}
+							}
+							em.Unit(e).current_movement_points = asc.remaining_movement_points;
+						}
+						else {
+							std::cout << "Did not find path\n";
+						}
+					}
 					entity_action = false;
 				}
 			}
