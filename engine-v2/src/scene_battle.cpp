@@ -499,6 +499,7 @@ void BattleScene::Render() {
 
 			FloodFillContext ffc;
 			ffc.remaining_movement_points = c.current_movement_points;
+			ffc.attack_range = em.Attack(sel_ent).range;
 			ffc.start = em.GridTransform(sel_ent).pos;
 			ffc.gm = &map;
 			FloodFill(ffc);
@@ -509,7 +510,7 @@ void BattleScene::Render() {
 				DrawTextureEx(gs->textures[movement_color], pos, 0.0f, 1.0f, temp_r);
 			}
 
-			for (auto node : ffc.edge_frontier) {
+			for (auto node : ffc.visited_atk_final) {
 				Vector2 pos = node;
 				pos *= gs->entity_scale;
 				DrawTextureEx(gs->textures[attack_color], pos, 0.0f, 1.0f, temp_r);

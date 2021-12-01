@@ -1,16 +1,20 @@
 #include "movement.h"
 
 void FloodFill(FloodFillContext& ffc) {
-	ffc.frontier.push(ffc.start);
-	ffc.cost[ffc.start] = 0;
+	std::unordered_set<IVector2, IVector2Hash> edge_frontier;
+	std::unordered_map<IVector2, int, IVector2Hash> cost;
+	std::queue<IVector2> frontier;
 
-	while (!ffc.frontier.empty()) {
-		auto curr_tile = ffc.frontier.front();
-		ffc.frontier.pop();
+	frontier.push(ffc.start);
+	cost[ffc.start] = 0;
+
+	while (!frontier.empty()) {
+		auto curr_tile = frontier.front();
+		frontier.pop();
 
 		if (ffc.visited.find(curr_tile) == ffc.visited.end()) {
 			ffc.visited.insert(curr_tile);
-			auto cost = ffc.cost[curr_tile];
+			auto curr_cost = cost[curr_tile];
 
 			const int num_directions = 4;
 			IVector2 directions[num_directions] = {
@@ -20,26 +24,24 @@ void FloodFill(FloodFillContext& ffc) {
 				{curr_tile.x + 1, curr_tile.y}  // east
 			};
 
-			if (cost < ffc.remaining_movement_points) {
-				ffc.finalCost[curr_tile] = cost;
-				
+			if (curr_cost < ffc.remaining_movement_points) {
 				for (int i = 0; i < num_directions; i++) {
 					IVector2 dir = directions[i];
 					if (ffc.gm->tiles.find(dir) != ffc.gm->tiles.end()) {
 						if (ffc.gm->tiles.at(dir).is_land) {
 							if (ffc.visited.find(dir) == ffc.visited.end()) {
-								int pathCost = cost + terrain_costs[ffc.gm->tiles[dir].terrain_type];
+								int pathCost = curr_cost + terrain_costs[ffc.gm->tiles[dir].terrain_type];
 
 								int cost_so_far = INT_MAX;
-								if (ffc.cost.find(dir) != ffc.cost.end()) {
-									cost_so_far = ffc.cost[dir];
+								if (cost.find(dir) != cost.end()) {
+									cost_so_far = cost[dir];
 								}
 
 								if (pathCost < cost_so_far) {
-									ffc.cost[dir] = pathCost;
+									cost[dir] = pathCost;
 								}
 
-								ffc.frontier.push(dir);
+								frontier.push(dir);
 							}
 						}
 					}
@@ -51,18 +53,18 @@ void FloodFill(FloodFillContext& ffc) {
 					if (ffc.gm->tiles.find(dir) != ffc.gm->tiles.end()) {
 						if (ffc.gm->tiles.at(dir).is_land) {
 							if (ffc.visited.find(dir) == ffc.visited.end()) {
-								int pathCost = cost + 1;
+								int pathCost = curr_cost + 1;
 
 								int cost_so_far = INT_MAX;
-								if (ffc.cost.find(dir) != ffc.cost.end()) {
-									cost_so_far = ffc.cost[dir];
+								if (cost.find(dir) != cost.end()) {
+									cost_so_far = cost[dir];
 								}
 
 								if (pathCost < cost_so_far) {
-									ffc.cost[dir] = pathCost;
+									cost[dir] = pathCost;
 								}
 
-								ffc.edge_frontier.insert(dir);
+								edge_frontier.insert(dir);
 							}
 						}
 					}
@@ -71,8 +73,61 @@ void FloodFill(FloodFillContext& ffc) {
 		}
 	}
 
+	std::unordered_set<IVector2, IVector2Hash> visited_atk;
+	for (auto& node : edge_frontier) {
+		cost.clear();
+		visited_atk.clear();
+		ffc.start = node;
+		frontier.push(ffc.start);
+		cost[ffc.start] = 1;
+
+		while (!frontier.empty()) {
+			auto curr_tile = frontier.front();
+			frontier.pop();
+
+			if (visited_atk.find(curr_tile) == visited_atk.end()) {
+				visited_atk.insert(curr_tile);
+				auto curr_cost = cost[curr_tile];
+
+				const int num_directions = 4;
+				IVector2 directions[num_directions] = {
+					{curr_tile.x, curr_tile.y - 1}, // north
+					{curr_tile.x, curr_tile.y + 1}, // south
+					{curr_tile.x - 1, curr_tile.y}, // west
+					{curr_tile.x + 1, curr_tile.y}  // east
+				};
+
+				if (curr_cost < ffc.attack_range) {
+					for (int i = 0; i < num_directions; i++) {
+						IVector2 dir = directions[i];
+						if (ffc.gm->tiles.find(dir) != ffc.gm->tiles.end()) {
+							if (ffc.gm->tiles.at(dir).is_land) {
+								if (visited_atk.find(dir) == visited_atk.end()) {
+									int pathCost = curr_cost + 1;//terrain_costs[ffc.gm->tiles[dir].terrain_type];
+
+									int cost_so_far = INT_MAX;
+									if (cost.find(dir) != cost.end()) {
+										cost_so_far = cost[dir];
+									}
+
+									if (pathCost < cost_so_far) {
+										cost[dir] = pathCost;
+									}
+
+									frontier.push(dir);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		ffc.visited_atk_final.merge(visited_atk);
+	}
+
 	for (auto& node : ffc.visited) {
-		ffc.edge_frontier.extract(node);
+		ffc.visited_atk_final.erase(node);
 	}
 }
 

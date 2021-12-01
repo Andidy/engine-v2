@@ -6,11 +6,9 @@
 struct FloodFillContext {
 	IVector2 start = {0, 0};
 	int remaining_movement_points = 0;
+	int attack_range = 0;
 	std::unordered_set<IVector2, IVector2Hash> visited;
-	std::unordered_set<IVector2, IVector2Hash> edge_frontier;
-	std::unordered_map<IVector2, int, IVector2Hash> cost;
-	std::unordered_map<IVector2, int, IVector2Hash> finalCost;
-	std::queue<IVector2> frontier;
+	std::unordered_set<IVector2, IVector2Hash> visited_atk_final;
 
 	GridMap* gm;
 };
