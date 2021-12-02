@@ -9,6 +9,8 @@ struct BattleScene : Scene {
 	// Game ===============================================
 	int selected_entity = -1;
 
+	bool back_button = false;
+
 	bool entity_up = false;
 	bool entity_down = false;
 	bool entity_left = false;
@@ -32,6 +34,15 @@ struct BattleScene : Scene {
 	bool debug = false;
 
 	GridMap map;
+
+	// State Machine ======================================
+	enum class State {
+		MoveCursor,
+		UnitSelected,
+		Menu,
+		Num_States
+	};
+	State state = State::MoveCursor;
 
 	// Rendering and Gui ==================================
 	Vector2 origin_debug_region;
