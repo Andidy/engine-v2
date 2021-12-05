@@ -40,14 +40,16 @@ struct IVector2 {
 		y -= v.y;
 	}
 
-	void operator*= (float s) {
+	IVector2& operator*= (float s) {
 		x = (int32_t)((float)x * s);
 		y = (int32_t)((float)y * s);
+		return *this;
 	}
 
-	void operator/= (float s) {
+	IVector2& operator/= (float s) {
 		x = (int32_t)((float)x / s);
 		y = (int32_t)((float)y / s);
+		return *this;
 	}
 
 	operator Vector2() const { return { (float)x, (float)y }; }
