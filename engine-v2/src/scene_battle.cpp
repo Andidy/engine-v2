@@ -409,6 +409,26 @@ void BattleScene::Update() {
 				break;
 			}
 
+			// Cursor movement
+			if (!mouse_control) {
+				if (left) {
+					cursor_pos.x -= 1;
+					left = false;
+				}
+				if (right) {
+					cursor_pos.x += 1;
+					right = false;
+				}
+				if (up) {
+					cursor_pos.y -= 1;
+					up = false;
+				}
+				if (down) {
+					cursor_pos.y += 1;
+					down = false;
+				}
+			}
+
 			// Get the selected entity's reference
 			Entity& e = em.entities[selected_entity];
 
