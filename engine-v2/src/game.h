@@ -28,5 +28,4 @@ struct GameState {
 	std::unordered_map<std::string, Scene*> scenes;
 
 	GameState() = default;
-	void Update();
 };
