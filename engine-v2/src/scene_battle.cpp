@@ -281,58 +281,7 @@ void BattleScene::Update() {
 		action_queue.pop();
 	}
 
-	// Update the camera
-	const float base_speed = 50;
-	const float speed_multiplier = 10;
-
-	float speed = base_speed;
-	if (camera_boost) {
-		speed *= speed_multiplier;
-	}
-
-	if (camera_left) {
-		camera.target.x -= speed * 2 * dt;
-	}
-	else if (camera_right) {
-		camera.target.x += speed * 2 * dt;
-	}
-	if (camera_up) {
-		camera.target.y -= speed * 2 * dt;
-	}
-	else if (camera_down) {
-		camera.target.y += speed * 2 * dt;
-	}
-	if ((camera_was_moving && !camera_up && !camera_down && !camera_left && !camera_right)) {
-		camera.target.x = roundf(camera.target.x);
-		camera.target.y = roundf(camera.target.y);
-	}
-
-	camera_was_moving = camera_up || camera_down || camera_left || camera_right;
-
-
-	float mouse_wheel_delta = GetMouseWheelMove();
-	if (mouse_wheel_delta > 0 || mouse_wheel_delta < 0) {
-		camera.zoom += mouse_wheel_delta / 10;
-		if (camera.zoom < 0.3f) {
-			camera.zoom = 0.3f;
-		}
-		else if (camera.zoom > 2.0f) {
-			camera.zoom = 2.0f;
-		}
-	}
-
-	if (camera_zoom_in) {
-		camera.zoom += speed * 0.1f * dt;
-	}
-	else if (camera_zoom_out) {
-		camera.zoom -= speed * 0.1f * dt;
-		if (camera.zoom < 0.3f) {
-			camera.zoom = 0.3f;
-		}
-		else if (camera.zoom > 2.0f) {
-			camera.zoom = 2.0f;
-		}
-	}
+	UpdateCamera(dt);
 
 	// Update the mouse position
 	mouse_pos = GetMousePosition();
@@ -359,24 +308,7 @@ void BattleScene::Update() {
 	switch (state) {
 		case State::MoveCursor: {
 			// Cursor movement
-			if (!mouse_control) {
-				if (left) {
-					cursor_pos.x -= 1;
-					left = false;
-				}
-				if (right) {
-					cursor_pos.x += 1;
-					right = false;
-				}
-				if (up) {
-					cursor_pos.y -= 1;
-					up = false;
-				}
-				if (down) {
-					cursor_pos.y += 1;
-					down = false;
-				}
-			}
+			sMoveCursor();
 
 			// Transition to Unit Selection
 			if (select) {
@@ -410,24 +342,7 @@ void BattleScene::Update() {
 			}
 
 			// Cursor movement
-			if (!mouse_control) {
-				if (left) {
-					cursor_pos.x -= 1;
-					left = false;
-				}
-				if (right) {
-					cursor_pos.x += 1;
-					right = false;
-				}
-				if (up) {
-					cursor_pos.y -= 1;
-					up = false;
-				}
-				if (down) {
-					cursor_pos.y += 1;
-					down = false;
-				}
-			}
+			sMoveCursor();
 
 			// Get the selected entity's reference
 			Entity& e = em.entities[selected_entity];
@@ -438,7 +353,6 @@ void BattleScene::Update() {
 				if (select) {
 					IVector2 source = em.GridTransform(e).pos;
 					IVector2 dest = cursor_pos;
-					int movement_points = em.Unit(e).current_movement_points;
 
 					// Test for attack ---
 					// Selected Grid in Range
@@ -465,31 +379,7 @@ void BattleScene::Update() {
 
 					// if we didn't attack an adjacent unit, move to the dest
 					if (!unit_on_grid) {
-						AStarContext asc;
-						asc.found_path = false;
-						asc.start = { source.x, source.y };
-						asc.goal = { dest.x, dest.y };
-						asc.remaining_movement_points = movement_points;
-						asc.gm = &map;
-						AStar(asc);
-						
-						if (asc.found_path) {
-							std::cout << "Found Path\n";
-							while (asc.path.size() > 0) {
-								int dir = asc.path.front();
-								asc.path.pop_front();
-								switch (dir) {
-									case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
-									case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
-									case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
-									case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
-								}
-							}
-							em.Unit(e).current_movement_points = asc.remaining_movement_points;
-						}
-						else {
-							std::cout << "Did not find path\n";
-						}
+						sUnitMovement(e, dest);
 					}
 					select = false;
 				}
@@ -1109,6 +999,8 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 	std::cout << "\n\n";
 }
 
+// Systems ====================================================================
+
 void BattleScene::sUnitUnitAction(Entity& src, Entity& target) {
 	if (src.unit < 0) {
 		std::cout << "Source is not a unit\n";
@@ -1121,5 +1013,113 @@ void BattleScene::sUnitUnitAction(Entity& src, Entity& target) {
 
 	if ((target.faction >= 0) && (em.Faction(target).faction != em.Faction(src).faction)) {
 		em.Health(target).current -= em.Attack(src).damage;
+	}
+}
+
+void BattleScene::sUnitMovement(Entity& unit, IVector2 dest) {
+	IVector2 source = { em.GridTransform(unit).pos };
+	
+	AStarContext asc;
+	asc.found_path = false;
+	asc.start = { source.x, source.y };
+	asc.goal = { dest.x, dest.y };
+	asc.remaining_movement_points = em.Unit(unit).current_movement_points;
+	asc.gm = &map;
+	AStar(asc);
+
+	if (asc.found_path) {
+		std::cout << "Found Path\n";
+		while (asc.path.size() > 0) {
+			int dir = asc.path.front();
+			asc.path.pop_front();
+			switch (dir) {
+				case 1: em.GridTransform(unit).pos.y -= 1.0f; std::cout << dir << "\n"; break;
+				case 2: em.GridTransform(unit).pos.y += 1.0f; std::cout << dir << "\n"; break;
+				case 3: em.GridTransform(unit).pos.x -= 1.0f; std::cout << dir << "\n"; break;
+				case 4: em.GridTransform(unit).pos.x += 1.0f; std::cout << dir << "\n"; break;
+			}
+		}
+		em.Unit(unit).current_movement_points = asc.remaining_movement_points;
+	}
+	else {
+		std::cout << "Did not find path\n";
+	}
+}
+
+void BattleScene::sMoveCursor() {
+	if (!mouse_control) {
+		if (left) {
+			cursor_pos.x -= 1;
+			left = false;
+		}
+		if (right) {
+			cursor_pos.x += 1;
+			right = false;
+		}
+		if (up) {
+			cursor_pos.y -= 1;
+			up = false;
+		}
+		if (down) {
+			cursor_pos.y += 1;
+			down = false;
+		}
+	}
+}
+
+// Camera =====================================================================
+
+void BattleScene::UpdateCamera(float dt) {
+	// Update the camera
+	const float base_speed = 50;
+	const float speed_multiplier = 10;
+
+	float speed = base_speed;
+	if (camera_boost) {
+		speed *= speed_multiplier;
+	}
+
+	if (camera_left) {
+		camera.target.x -= speed * 2 * dt;
+	}
+	else if (camera_right) {
+		camera.target.x += speed * 2 * dt;
+	}
+	if (camera_up) {
+		camera.target.y -= speed * 2 * dt;
+	}
+	else if (camera_down) {
+		camera.target.y += speed * 2 * dt;
+	}
+	if ((camera_was_moving && !camera_up && !camera_down && !camera_left && !camera_right)) {
+		camera.target.x = roundf(camera.target.x);
+		camera.target.y = roundf(camera.target.y);
+	}
+
+	camera_was_moving = camera_up || camera_down || camera_left || camera_right;
+
+
+	float mouse_wheel_delta = GetMouseWheelMove();
+	if (mouse_wheel_delta > 0 || mouse_wheel_delta < 0) {
+		camera.zoom += mouse_wheel_delta / 10;
+		if (camera.zoom < 0.3f) {
+			camera.zoom = 0.3f;
+		}
+		else if (camera.zoom > 2.0f) {
+			camera.zoom = 2.0f;
+		}
+	}
+
+	if (camera_zoom_in) {
+		camera.zoom += speed * 0.1f * dt;
+	}
+	else if (camera_zoom_out) {
+		camera.zoom -= speed * 0.1f * dt;
+		if (camera.zoom < 0.3f) {
+			camera.zoom = 0.3f;
+		}
+		else if (camera.zoom > 2.0f) {
+			camera.zoom = 2.0f;
+		}
 	}
 }

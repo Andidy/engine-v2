@@ -98,6 +98,8 @@ struct BattleScene : Scene {
 	const Rectangle game_window = { game_origin.x, game_origin.y, game_width, game_height };
 	Camera2D camera = { { 0.0f, 0.0f }, {0.0f, 0.0f}, 0.0f, 1.0f };
 
+	void UpdateCamera(float dt);
+
 	RenderTexture2D render_texture;
 
 	void Init();
@@ -109,4 +111,6 @@ struct BattleScene : Scene {
 
 	// Systems ================================================================
 	void sUnitUnitAction(Entity& src, Entity& target);
+	void sUnitMovement(Entity& unit, IVector2 dest);
+	void sMoveCursor();
 };
