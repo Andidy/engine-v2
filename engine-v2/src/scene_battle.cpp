@@ -440,9 +440,7 @@ void BattleScene::Update() {
 
 					if (grid_in_range && unit_on_grid) {
 						Entity& target = *unit;
-						if ((target.faction >= 0) && (em.Faction(target).faction != em.Faction(e).faction)) {
-							em.Health(target).current -= em.Attack(e).damage;
-						}
+						sUnitUnitAction(e, target);
 					}
 
 					// if we didn't attack an adjacent unit, move to the dest
@@ -1089,4 +1087,19 @@ void BattleScene::ReadEntityFromFile(std::string filename) {
 	}
 
 	std::cout << "\n\n";
+}
+
+void BattleScene::sUnitUnitAction(Entity& src, Entity& target) {
+	if (src.unit < 0) {
+		std::cout << "Source is not a unit\n";
+		return;
+	}
+	if (target.unit < 0) {
+		std::cout << "Target is not a unit\n";
+		return;
+	}
+
+	if ((target.faction >= 0) && (em.Faction(target).faction != em.Faction(src).faction)) {
+		em.Health(target).current -= em.Attack(src).damage;
+	}
 }

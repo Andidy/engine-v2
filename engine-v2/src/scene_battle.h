@@ -106,4 +106,7 @@ struct BattleScene : Scene {
 	void DrawGridLines();
 	void WriteEntityToFile();
 	void ReadEntityFromFile(std::string filename);
+
+	// Systems ================================================================
+	void sUnitUnitAction(Entity& src, Entity& target);
 };
