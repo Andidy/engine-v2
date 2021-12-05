@@ -18,11 +18,6 @@ struct GameState {
 	std::unordered_map<std::string, size_t> texture_handles;
 	std::vector<Texture2D> textures;
 
-	// Entities and Components ================================================
-	std::unordered_map<std::string, cGridTransform> blueprint_grid_transforms;
-	std::unordered_map<std::string, cRenderable> blueprint_renderables;
-	std::unordered_map<std::string, cUnit> blueprint_units;
-
 	// Scenes =================================================================
 	Scene* current_scene = nullptr;
 	std::unordered_map<std::string, Scene*> scenes;
