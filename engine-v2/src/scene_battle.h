@@ -9,14 +9,12 @@ struct BattleScene : Scene {
 	// Game ===============================================
 	int selected_entity = -1;
 
-	bool back_button = false;
-
-	bool entity_up = false;
-	bool entity_down = false;
-	bool entity_left = false;
-	bool entity_right = false;
-	bool entity_select = false;
-	bool entity_action = false;
+	bool up = false;
+	bool down = false;
+	bool left = false;
+	bool right = false;
+	bool select = false;
+	bool back = false;
 	bool reset_movement = false;
 
 	bool camera_up = false;
@@ -34,6 +32,8 @@ struct BattleScene : Scene {
 	bool debug = false;
 
 	GridMap map;
+
+	bool mouse_control = false;
 
 	// State Machine ======================================
 	enum class State {
@@ -87,9 +87,10 @@ struct BattleScene : Scene {
 	std::vector<gui::Element*> entity_spawner_controls;
 
 	// Camera and UI Information ==============================================
-	Vector2 mouse_pos = {};
-	Vector2 world_pos = {};
-	IVector2 grid_pos = {};
+	Vector2 mouse_pos = {0,0};
+	Vector2 world_pos = {0,0};
+	IVector2 grid_pos = {0,0};
+	IVector2 cursor_pos = {0,0};
 
 	const Vector2 game_origin = { 25, 25 };
 	const float game_width = 640;

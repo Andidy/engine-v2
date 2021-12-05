@@ -4,15 +4,18 @@
 // Battle Scene ===============================================================
 
 void BattleScene::Init() {
+	// 0 is keyboard
 	RegisterAction(0, KEY_O, "SAVEGAME");
 	RegisterAction(0, KEY_I, "LOADGAME");
 	RegisterAction(0, KEY_U, "DELETESAVE");
 	RegisterAction(0, KEY_EQUAL, "DEBUG");
 
-	RegisterAction(0, KEY_W, "ENTITY_UP");
-	RegisterAction(0, KEY_D, "ENTITY_RIGHT");
-	RegisterAction(0, KEY_S, "ENTITY_DOWN");
-	RegisterAction(0, KEY_A, "ENTITY_LEFT");
+	RegisterAction(0, KEY_J, "SELECT");
+	RegisterAction(0, KEY_K, "BACK");
+	RegisterAction(0, KEY_W, "UP");
+	RegisterAction(0, KEY_D, "RIGHT");
+	RegisterAction(0, KEY_S, "DOWN");
+	RegisterAction(0, KEY_A, "LEFT");
 	RegisterAction(0, KEY_R, "RESET_MOVEMENT");
 
 	RegisterAction(0, KEY_LEFT, "CAMERA_LEFT");
@@ -22,12 +25,12 @@ void BattleScene::Init() {
 	RegisterAction(0, KEY_LEFT_SHIFT, "CAMERA_BOOST");
 	RegisterAction(0, KEY_PAGE_UP, "CAMERA_ZOOM_IN");
 	RegisterAction(0, KEY_PAGE_DOWN, "CAMERA_ZOOM_OUT");
+	
+	// 1 is mouse
+	RegisterAction(1, MOUSE_BUTTON_LEFT, "SELECT");
+	RegisterAction(1, MOUSE_BUTTON_RIGHT, "BACK");
 
-	RegisterAction(0, KEY_SPACE, "BACK_BUTTON");
-
-	RegisterAction(1, MOUSE_BUTTON_LEFT, "ENTITY_SELECT");
-	RegisterAction(1, MOUSE_BUTTON_RIGHT, "ENTITY_ACTION");
-
+	// 2 is controller
 	RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_LEFT, "ENTITY_LEFT");
 	RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, "ENTITY_RIGHT");
 	RegisterAction(2, GAMEPAD_BUTTON_RIGHT_FACE_UP, "ENTITY_UP");
@@ -41,18 +44,18 @@ void BattleScene::Init() {
 	RegisterAction(2, GAMEPAD_BUTTON_RIGHT_TRIGGER_1, "CAMERA_BOOST");
 	RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_1, "CAMERA_ZOOM_IN");
 	RegisterAction(2, GAMEPAD_BUTTON_LEFT_TRIGGER_2, "CAMERA_ZOOM_OUT");
-
+	
+	// 3 is controller axis
 	//RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_LEFT");
 	//RegisterAction(3, GAMEPAD_AXIS_RIGHT_X, "CAMERA_RIGHT");
 	//RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_UP");
 	//RegisterAction(3, GAMEPAD_AXIS_RIGHT_Y, "CAMERA_DOWN");
 
-
-	origin_debug_region = { game_window.x + game_window.width, 0 };
-	origin_debug_region2 = { 10, game_window.y + game_window.height };
-
 	// my_layout: controls initialization
 	//----------------------------------------------------------------------------------
+	origin_debug_region = { game_window.x + game_window.width, 0 };
+	origin_debug_region2 = { 10, game_window.y + game_window.height };
+	
 	anchor01 = origin_debug_region;
 	anchor02 = origin_debug_region2;
 
@@ -217,8 +220,23 @@ void BattleScene::Update() {
 		}
 
 		// General Actions
-		if (action.hash == str_hash("BACK_BUTTON")) {
-			back_button = action.type == ActionType::END;
+		if (action.hash == str_hash("UP")) {
+			up = action.type == ActionType::END;
+		}
+		if (action.hash == str_hash("DOWN")) {
+			down = action.type == ActionType::END;
+		}
+		if (action.hash == str_hash("LEFT")) {
+			left = action.type == ActionType::END;
+		}
+		if (action.hash == str_hash("RIGHT")) {
+			right = action.type == ActionType::END;
+		}
+		if (action.hash == str_hash("SELECT")) {
+			select = action.type == ActionType::END;
+		}
+		if (action.hash == str_hash("BACK")) {
+			back = action.type == ActionType::END;
 		}
 
 		// IO
@@ -256,24 +274,6 @@ void BattleScene::Update() {
 		}
 
 		// Entity Actions
-		if (action.hash == str_hash("ENTITY_UP")) {
-			entity_up = action.type == ActionType::END;
-		}
-		if (action.hash == str_hash("ENTITY_DOWN")) {
-			entity_down = action.type == ActionType::END;
-		}
-		if (action.hash == str_hash("ENTITY_LEFT")) {
-			entity_left = action.type == ActionType::END;
-		}
-		if (action.hash == str_hash("ENTITY_RIGHT")) {
-			entity_right = action.type == ActionType::END;
-		}
-		if (action.hash == str_hash("ENTITY_SELECT")) {
-			entity_select = action.type == ActionType::END;
-		}
-		if (action.hash == str_hash("ENTITY_ACTION")) {
-			entity_action = action.type == ActionType::END;
-		}
 		if (action.hash == str_hash("RESET_MOVEMENT")) {
 			reset_movement = action.type == ActionType::END;
 		}
@@ -344,6 +344,10 @@ void BattleScene::Update() {
 	grid_pos.x = (int)floorf(world_pos.x / (float)gs->entity_scale);
 	grid_pos.y = (int)floorf(world_pos.y / (float)gs->entity_scale);
 
+	if (mouse_control) {
+		cursor_pos = grid_pos;
+	}
+
 	// Reset movement points when turn ends
 	if (reset_movement) {
 		for (Entity& e : em.entities) {
@@ -354,19 +358,36 @@ void BattleScene::Update() {
 
 	switch (state) {
 		case State::MoveCursor: {
-			// Handles cursor movement
-			// TODO
+			// Cursor movement
+			if (!mouse_control) {
+				if (left) {
+					cursor_pos.x -= 1;
+					left = false;
+				}
+				if (right) {
+					cursor_pos.x += 1;
+					right = false;
+				}
+				if (up) {
+					cursor_pos.y -= 1;
+					up = false;
+				}
+				if (down) {
+					cursor_pos.y += 1;
+					down = false;
+				}
+			}
 
 			// Transition to Unit Selection
-			if (entity_select) {
+			if (select) {
 				for (int i = 0; i < em.entities.size(); i++) {
 					if (em.entities[i].grid_transform >= 0) {
-						if (grid_pos == em.c_grid_transforms[em.entities[i].grid_transform].pos) {
+						if (cursor_pos == em.c_grid_transforms[em.entities[i].grid_transform].pos) {
 							selected_entity = i;
 						}
 					}
 				}
-				entity_select = false;
+				select = false;
 			}
 
 			if (selected_entity >= 0) {
@@ -381,42 +402,22 @@ void BattleScene::Update() {
 			}
 			
 			// Deselect Unit
-			if (back_button) {
+			if (back) {
 				selected_entity = -1;
 				state = State::MoveCursor;
-				back_button = false;
+				back = false;
 				break;
 			}
 
 			// Get the selected entity's reference
 			Entity& e = em.entities[selected_entity];
 
-			// Debug movement
-			if (e.grid_transform >= 0) {
-				if (entity_left) {
-					em.GridTransform(e).pos.x -= 1;
-					entity_left = false;
-				}
-				if (entity_right) {
-					em.GridTransform(e).pos.x += 1;
-					entity_right = false;
-				}
-				if (entity_up) {
-					em.GridTransform(e).pos.y -= 1;
-					entity_up = false;
-				}
-				if (entity_down) {
-					em.GridTransform(e).pos.y += 1;
-					entity_down = false;
-				}
-			}
-
 			// Unit Movement And Attack
 			if (e.unit >= 0) {
 				// Attack or Move the unit
-				if (entity_action) {
+				if (select) {
 					IVector2 source = em.GridTransform(e).pos;
-					IVector2 dest = grid_pos;
+					IVector2 dest = cursor_pos;
 					int movement_points = em.Unit(e).current_movement_points;
 
 					// Test for attack ---
@@ -431,8 +432,10 @@ void BattleScene::Update() {
 					Entity* unit = nullptr;
 					for (Entity& ne : em.entities) {
 						unit_on_grid = ((ne.unit >= 0) && (ne.grid_transform >= 0) && (em.GridTransform(ne).pos == dest));
-						unit = &ne;
-						break;
+						if (unit_on_grid) {
+							unit = &ne;
+							break;
+						}
 					}
 
 					if (grid_in_range && unit_on_grid) {
@@ -470,7 +473,7 @@ void BattleScene::Update() {
 							std::cout << "Did not find path\n";
 						}
 					}
-					entity_action = false;
+					select = false;
 				}
 			}
 
@@ -485,108 +488,6 @@ void BattleScene::Update() {
 		default:
 			__debugbreak(); // something brokey
 	}
-
-	/*
-	if (em.entities.size() >= 1) {
-		// Select an entity
-		if (entity_select) {
-			for (int i = 0; i < em.entities.size(); i++) {
-				if (em.entities[i].grid_transform >= 0) {
-					if (grid_pos == em.c_grid_transforms[em.entities[i].grid_transform].pos) {
-						selected_entity = i;
-					}
-				}
-			}
-			entity_select = false;
-		}
-
-		Entity& e = em.entities[selected_entity];
-		if (e.grid_transform >= 0) {
-			if (entity_left) {
-				em.GridTransform(e).pos.x -= 1;
-				entity_left = false;
-			}
-			if (entity_right) {
-				em.GridTransform(e).pos.x += 1;
-				entity_right = false;
-			}
-			if (entity_up) {
-				em.GridTransform(e).pos.y -= 1;
-				entity_up = false;
-			}
-			if (entity_down) {
-				em.GridTransform(e).pos.y += 1;
-				entity_down = false;
-			}
-
-			if (e.unit >= 0) {
-				// Reset movement points of the current unit
-				if (reset_movement) {
-					em.Unit(e).current_movement_points = em.Unit(e).movement_points;
-					reset_movement = false;
-				}
-
-				// Attack or Move the unit
-				if (entity_action) {
-					Vector2 source = em.GridTransform(e).pos;
-					Vector2 dest = grid_pos;
-					int movement_points = em.Unit(e).current_movement_points;
-
-					// Check if dest is a neighboring grid space
-					bool attacked_adjacent_unit = false;
-					Vector2 delta = dest - source;
-					if ((abs(delta.x) == 1) != (abs(delta.y) == 1)) {
-						// Check if the neighboring grid space has a unit
-						for (Entity& ne : em.entities) {
-							if ((ne.unit >= 0) && (ne.grid_transform >= 0) && (em.GridTransform(ne).pos == dest)) {
-								// Check if the unit
-								if ((ne.faction >= 0) && (em.Faction(ne).faction != em.Faction(e).faction)) {
-									em.Health(ne).current -= em.Attack(e).damage;
-									attacked_adjacent_unit = true;
-								}
-								break;
-							}
-						}
-					}
-
-					// if we didn't attack an adjacent unit, move to the dest
-					if (!attacked_adjacent_unit) {
-						AStarContext asc;
-						asc.found_path = false;
-						asc.start = { (int)source.x, (int)source.y };
-						asc.goal = { (int)dest.x, (int)dest.y };
-						asc.remaining_movement_points = movement_points;
-						asc.gm = &map;
-						AStar(asc);
-						if (asc.found_path) {
-							std::cout << "Found Path\n";
-							while (asc.path.size() > 0) {
-								int dir = asc.path.front();
-								asc.path.pop_front();
-								switch (dir) {
-									case 1: em.GridTransform(e).pos.y -= 1.0f; std::cout << dir << "\n"; break;
-									case 2: em.GridTransform(e).pos.y += 1.0f; std::cout << dir << "\n"; break;
-									case 3: em.GridTransform(e).pos.x -= 1.0f; std::cout << dir << "\n"; break;
-									case 4: em.GridTransform(e).pos.x += 1.0f; std::cout << dir << "\n"; break;
-								}
-							}
-							em.Unit(e).current_movement_points = asc.remaining_movement_points;
-						}
-						else {
-							std::cout << "Did not find path\n";
-						}
-					}
-					entity_action = false;
-				}
-			}
-
-			// Setup rendering information
-			if (e.renderable >= 0) {
-				em.Renderable(e).pos = em.GridTransform(e).pos * gs->entity_scale;
-			}
-		}
-	}
-	*/
 
 	if (save) {
 		WriteEntityToFile();
@@ -652,22 +553,22 @@ void BattleScene::Render() {
 			ffc.gm = &map;
 			FloodFill(ffc);
 
-			for (auto node : ffc.visited) {
+			for (auto& node : ffc.visited) {
 				Vector2 pos = node;
 				pos *= gs->entity_scale;
 				DrawTextureEx(gs->textures[movement_color], pos, 0.0f, 1.0f, temp_r);
 			}
 
-			for (auto node : ffc.visited_atk_final) {
+			for (auto& node : ffc.visited_atk_final) {
 				Vector2 pos = node;
 				pos *= gs->entity_scale;
 				DrawTextureEx(gs->textures[attack_color], pos, 0.0f, 1.0f, temp_r);
 			}
 
 			// Show path to mouse cursor
-			if (grid_pos != em.GridTransform(sel_ent).pos) {
+			if (cursor_pos != em.GridTransform(sel_ent).pos) {
 				Vector2 source = em.GridTransform(sel_ent).pos;
-				Vector2 dest = grid_pos;
+				Vector2 dest = cursor_pos;
 				int movement_points = em.Unit(sel_ent).current_movement_points;
 
 				// Build path from unit to cursor
@@ -844,6 +745,8 @@ void BattleScene::Render() {
 			}
 		}
 	}
+
+	DrawTextureEx(gs->textures[gs->texture_handles["cursor_tile"]], cursor_pos * gs->entity_scale, 0.0f, 2.0f, WHITE);
 
 	EndMode2D();
 	EndTextureMode();
